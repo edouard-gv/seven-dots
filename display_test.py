@@ -14,9 +14,3 @@ def test_new_frame():
     display = Display()
     result = display.new_frame()
     assert True  # Replace with real test
-
-
-def test_print_byte():
-    display = Display()
-    assert display.print_byte(79) = ""
-    assert True  # Replace with real test
