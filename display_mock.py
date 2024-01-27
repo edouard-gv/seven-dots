@@ -6,6 +6,7 @@ class MockSerialPort:
 
     def sendClose(self):
         self.write(0x8F)
+        print(self.output)
 
     def sendBytes(self, *bytes):
         for byte in bytes:

@@ -1,1 +1,4 @@
 mediapipe
+python-statemachine[diagrams]
+pydot
+Graphviz
