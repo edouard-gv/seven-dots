@@ -24,7 +24,8 @@ class DotsMachine(StateMachine):
         | bye.to(bye, internal=True)
         | countdown_confirm_stop.to(countdown_confirm_stop, internal=True)
     )
-    turn_off = bye.to(blank_screen) | countdown.to(bye)
+    turn_off = bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
+
     victory = (
         blank_screen.to(countdown)
         | hello.to(countdown)
@@ -32,13 +33,10 @@ class DotsMachine(StateMachine):
         | countdown.to(countdown, internal=True)
     )
 
-    thumb_up = (
-        countdown_confirm_stop.to(bye)
-        | bye.to(bye, internal=True)
-    )
+    thumb_up = countdown_confirm_stop.to(bye) | bye.to(bye, internal=True)
 
     thumb_down = (
-        countdown_confirm_stop.to(countdown)
+        countdown_confirm_stop.to(countdown) 
         | countdown.to(countdown, internal=True)
     )
 
@@ -64,7 +62,7 @@ class DotsMachine(StateMachine):
 
     def on_enter_countdown(self, event, state):
         if not self.countdown_running():
-            self.countdown_value = 120 # 120 ticks are 2 minutes
+            self.countdown_value = 120  # 120 ticks are 2 minutes
             self.countdown_timer = self.get_timer(1, self.countdown_tick)
             self.countdown_timer.start()
 
@@ -75,7 +73,7 @@ class DotsMachine(StateMachine):
             self.countdown_timer = self.get_timer(1, self.countdown_tick)
             self.countdown_timer.start()
         else:
-            if self.current_state == self.countdown:
+            if self.current_state in [self.countdown, self.countdown_confirm_stop]:
                 self.turn_off()
 
     def on_enter_state(self, event, state):

@@ -161,6 +161,23 @@ def test_countdown_cannot_be_launched_twice():
         timers.tick()
     assert m.countdown_value == 2
 
+def test_when_countdown_stops_during_confirmation():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+    )
+    m.victory()
+    for _ in range(119):
+        timers.tick()
+    assert m.countdown_value == 1
+    m.closed_fist()
+    assert m.current_state.name == "Countdown confirm stop"
+    timers.tick()
+    timers.tick()
+    timers.tick()
+    assert m.current_state.name == "Bye"
+
+
 
 def test_countdown_should_be_interrupted_by_bye_with_confirmation():
     m = DotsMachine(fake_controler, start_value="hello")
