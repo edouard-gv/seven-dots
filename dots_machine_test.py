@@ -129,6 +129,17 @@ def test_launch_2min_chronos():
     timers.tick()
     assert m.current_state.name == "Bye"
 
+def test_countdown_can_be_interupted():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+    )
+    m.victory()
+    assert m.current_state.name == "Countdown"
+    timers.tick()
+    m.open_palm()
+    assert m.current_state.name == "Hello"
+
 
 if __name__ == "__main__":
     pass

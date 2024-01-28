@@ -9,8 +9,18 @@ class DotsMachine(StateMachine):
     bye = State()
     countdown = State()
 
-    open_palm = blank_screen.to(hello) | bye.to(hello) | hello.to(hello, internal=True)
-    closed_fist = blank_screen.to(bye) | hello.to(bye) | bye.to(bye, internal=True)
+    open_palm = (
+        blank_screen.to(hello)
+        | bye.to(hello)
+        | countdown.to(hello)
+        | hello.to(hello, internal=True)
+    )
+    closed_fist = (
+        blank_screen.to(bye)
+        | hello.to(bye)
+        | countdown.to(bye)
+        | bye.to(bye, internal=True)
+    )
     turn_off = bye.to(blank_screen) | countdown.to(bye)
     victory = (
         blank_screen.to(countdown)
@@ -19,7 +29,7 @@ class DotsMachine(StateMachine):
         | countdown.to(countdown, internal=True)
     )
 
-    #timer factory that can be overiden for testing
+    # timer factory that can be overiden for testing
     def get_timer(nb_ticks, callback):
         return threading.Timer(nb_ticks, callback)
 
