@@ -48,6 +48,9 @@ def get_mocked_timer_factory(timers):
             if self in self.timers.timers:
                 timers.unsubscribe(self)
 
+        def is_alive(self):
+            return self.started and not self.cancelled
+
         def tick(self):
             self.nb_ticks -= 1
             if self.nb_ticks == 0:
@@ -153,10 +156,40 @@ def test_countdown_cannot_be_launched_twice():
     timers.tick()
     m.open_palm()
     timers.tick()
-    m.victory()  # should reset the countdown
-    for _ in range(118):
+    m.victory()  # should not reset the countdown
+    for _ in range(116):
         timers.tick()
     assert m.countdown_value == 2
+
+
+def test_countdown_should_be_interrupted_by_bye_with_confirmation():
+    m = DotsMachine(fake_controler, start_value="hello")
+    m.victory()
+    m.closed_fist()
+    m.thumb_up()
+    assert m.current_state.name == "Bye"
+
+def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+    )
+    m.victory()
+    timers.tick()
+    m.closed_fist()
+    m.thumb_down()
+    assert m.countdown_running() == True
+    assert m.current_state.name == "Countdown"
+    assert m.countdown_value == 119
+
+def test_countdown_should_be_interrupted_by_bye_in_all_states():
+    m = DotsMachine(fake_controler, start_value="hello")
+    m.victory()
+    m.open_palm()
+    m.closed_fist()
+    m.thumb_up()
+    assert m.countdown_running() == False
+    assert m.current_state.name == "Bye"
 
 
 if __name__ == "__main__":

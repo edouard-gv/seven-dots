@@ -28,13 +28,15 @@ class SevenDotsControler:
             alphabet.writeCenter("Bye", self.DISPLAY)
         if self.machine.current_state.name == "Blank screen":
             self.clear_display()
+        if self.machine.current_state.name == "Countdown confirm stop":
+            alphabet.writeCenter("Stop ?", self.DISPLAY)
         if self.machine.current_state.name == "Countdown":
-            if self.machine.countdown_value > 0:
+            if self.machine.countdown_running():
                 alphabet.writeCenter(
                     str(int(self.machine.countdown_value)), self.DISPLAY
                 )
         else:
-            if self.machine.countdown_value > 0:
+            if self.machine.countdown_running():
                 alphabet.write(
                     str(int(self.machine.countdown_value)), self.DISPLAY, line_shift=3
                 )

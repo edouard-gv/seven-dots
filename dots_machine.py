@@ -8,6 +8,7 @@ class DotsMachine(StateMachine):
     hello = State()
     bye = State()
     countdown = State()
+    countdown_confirm_stop = State()
 
     open_palm = (
         blank_screen.to(hello)
@@ -17,15 +18,27 @@ class DotsMachine(StateMachine):
     )
     closed_fist = (
         blank_screen.to(bye)
-        | hello.to(bye)
-        | countdown.to(bye)
+        | hello.to(bye, unless="countdown_running")
+        | hello.to(countdown_confirm_stop, cond="countdown_running")
+        | countdown.to(countdown_confirm_stop)
         | bye.to(bye, internal=True)
+        | countdown_confirm_stop.to(countdown_confirm_stop, internal=True)
     )
-    turn_off = bye.to(blank_screen)
+    turn_off = bye.to(blank_screen) | countdown.to(bye)
     victory = (
         blank_screen.to(countdown)
         | hello.to(countdown)
         | bye.to(countdown)
+        | countdown.to(countdown, internal=True)
+    )
+
+    thumb_up = (
+        countdown_confirm_stop.to(bye)
+        | bye.to(bye, internal=True)
+    )
+
+    thumb_down = (
+        countdown_confirm_stop.to(countdown)
         | countdown.to(countdown, internal=True)
     )
 
@@ -44,14 +57,16 @@ class DotsMachine(StateMachine):
 
     def on_enter_bye(self, event, state):
         self.turn_off_timer = self.get_timer(2, self.turn_off)
+        if self.countdown_running():
+            self.countdown_timer.cancel()
+            self.countdown_timer = None
         self.turn_off_timer.start()
 
     def on_enter_countdown(self, event, state):
-        self.countdown_value = 120 # 120 ticks are 2 minutes
-        if self.countdown_timer is not None:
-            self.countdown_timer.cancel()
-        self.countdown_timer = self.get_timer(1, self.countdown_tick)
-        self.countdown_timer.start()
+        if not self.countdown_running():
+            self.countdown_value = 120 # 120 ticks are 2 minutes
+            self.countdown_timer = self.get_timer(1, self.countdown_tick)
+            self.countdown_timer.start()
 
     def countdown_tick(self):
         self.controler.post_process()
@@ -60,7 +75,8 @@ class DotsMachine(StateMachine):
             self.countdown_timer = self.get_timer(1, self.countdown_tick)
             self.countdown_timer.start()
         else:
-            self.closed_fist()
+            if self.current_state == self.countdown:
+                self.turn_off()
 
     def on_enter_state(self, event, state):
         if self.turn_off_timer is not None:
@@ -72,6 +88,9 @@ class DotsMachine(StateMachine):
         # but the machine enters the initial state and triggers the enter state event
         if hasattr(self.controler, "machine") and state != self.countdown:
             self.controler.post_process()
+
+    def countdown_running(self):
+        return self.countdown_timer is not None and self.countdown_timer.is_alive()
 
 
 if __name__ == "__main__":
