@@ -33,12 +33,12 @@ class SevenDotsControler:
         if self.machine.current_state.name == "Countdown":
             if self.machine.countdown_running():
                 alphabet.writeCenter(
-                    str(int(self.machine.countdown_value)), self.DISPLAY
+                    alphabet.print_seconds(self.machine.countdown_value), self.DISPLAY
                 )
         else:
-            if self.machine.countdown_running():
+            if self.machine.countdown_running() and not self.machine.current_state.name == "Bye":
                 alphabet.write(
-                    str(int(self.machine.countdown_value)), self.DISPLAY, line_shift=3
+                    alphabet.print_seconds(self.machine.countdown_value), self.DISPLAY, line_shift=3
                 )
         self.show()
 

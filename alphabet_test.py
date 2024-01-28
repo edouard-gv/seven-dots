@@ -72,3 +72,9 @@ def test_print_dont_clear():
         [21, 22, 23, 24, 25, 26, 27],
     ]
 
+
+def test_printseconds_over60():
+    assert alphabet.print_seconds(61) == " 1:01"
+
+def test_printseconds_under60():
+    assert alphabet.print_seconds(9) == "   09"

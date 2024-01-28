@@ -30,14 +30,21 @@ class DotsMachine(StateMachine):
         blank_screen.to(countdown, on="set_countdown_to_120")
         | hello.to(countdown, on="set_countdown_to_120")
         | bye.to(countdown, on="set_countdown_to_120")
-        | countdown.to(countdown, internal=True)
+        | countdown.to(countdown, on="set_countdown_to_120", unless="action_was_victory")
+        | countdown.to(countdown, cond="action_was_victory", internal=True)
     )
 
     pointing_up = (
         blank_screen.to(countdown, on="set_countdown_to_60")
         | hello.to(countdown, on="set_countdown_to_60")
         | bye.to(countdown, on="set_countdown_to_60")
-        | countdown.to(countdown, internal=True)
+        | countdown.to(countdown, on="set_countdown_to_60", unless="action_was_pointing_up")
+        | countdown.to(countdown, cond="action_was_pointing_up", internal=True)
+    )
+
+    none = (
+        countdown.to(countdown, unless="action_was_none")
+        | countdown.to(countdown, cond="action_was_none", internal=True)
     )
 
     thumb_up = countdown_confirm_stop.to(bye) | bye.to(bye, internal=True)
@@ -58,6 +65,7 @@ class DotsMachine(StateMachine):
         self.countdown_value = 0
         self.countdown_timer = None
         self.get_timer = get_timer
+        self.previous_action = None
         super(DotsMachine, self).__init__(*args, **kwargs)
 
     def on_enter_bye(self, event, state):
@@ -70,10 +78,23 @@ class DotsMachine(StateMachine):
     def set_countdown_to_120(self):
         if not self.countdown_running():
             self.countdown_value = 120  # 120 ticks are 2 minutes
+        else:
+            self.countdown_value += 120
 
     def set_countdown_to_60(self):
         if not self.countdown_running():
-            self.countdown_value = 60  # 120 ticks are 2 minutes
+            self.countdown_value = 60  # 60 ticks are 1 minute
+        else:
+            self.countdown_value += 60
+
+    def action_was_pointing_up(self, event, state):
+        return self.previous_action == 'pointing_up'
+
+    def action_was_victory(self, event, state):
+        return self.previous_action == 'victory'
+
+    def action_was_none(self, event, state):
+        return self.previous_action == 'none'
 
     def on_enter_countdown(self, event, state):
         if not self.countdown_running():
@@ -91,6 +112,7 @@ class DotsMachine(StateMachine):
         self.controler.post_process()
 
     def on_enter_state(self, event, state):
+        self.previous_action = event
         if self.turn_off_timer is not None:
             self.turn_off_timer.cancel()
             self.turn_off_timer = None

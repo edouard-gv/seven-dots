@@ -1,4 +1,4 @@
-alphabet = " 0123456789-abcdefghijklmnopqrstuvwxyz?'"
+alphabet = " 0123456789-abcdefghijklmnopqrstuvwxyz?':"
 alphabet_bin = [
     0b0000000,  # spacja
     0b1111110,  # 0
@@ -40,6 +40,7 @@ alphabet_bin = [
     0b1101101,  # z
     0b1100100,  # ?
     0b0000010,  # '
+    0b0001001,  # :
 ]
 
 nums = [
@@ -74,3 +75,9 @@ def writeCenter(text, DISPLAY):
     for i in range(spacesLength):
         spaces += " "
     write(spaces + text, DISPLAY)
+
+# converting seconds to time
+def print_seconds(seconds):
+    minutes = seconds // 60
+    seconds %= 60
+    return f"{minutes:>2}:{seconds:02}" if minutes else f"   {seconds:02}"
