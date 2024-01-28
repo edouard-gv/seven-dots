@@ -27,9 +27,16 @@ class DotsMachine(StateMachine):
     turn_off = bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
 
     victory = (
-        blank_screen.to(countdown)
-        | hello.to(countdown)
-        | bye.to(countdown)
+        blank_screen.to(countdown, on="set_countdown_to_120")
+        | hello.to(countdown, on="set_countdown_to_120")
+        | bye.to(countdown, on="set_countdown_to_120")
+        | countdown.to(countdown, internal=True)
+    )
+
+    pointing_up = (
+        blank_screen.to(countdown, on="set_countdown_to_60")
+        | hello.to(countdown, on="set_countdown_to_60")
+        | bye.to(countdown, on="set_countdown_to_60")
         | countdown.to(countdown, internal=True)
     )
 
@@ -60,14 +67,20 @@ class DotsMachine(StateMachine):
             self.countdown_timer = None
         self.turn_off_timer.start()
 
-    def on_enter_countdown(self, event, state):
+    def set_countdown_to_120(self):
         if not self.countdown_running():
             self.countdown_value = 120  # 120 ticks are 2 minutes
+
+    def set_countdown_to_60(self):
+        if not self.countdown_running():
+            self.countdown_value = 60  # 120 ticks are 2 minutes
+
+    def on_enter_countdown(self, event, state):
+        if not self.countdown_running():
             self.countdown_timer = self.get_timer(1, self.countdown_tick)
             self.countdown_timer.start()
 
     def countdown_tick(self):
-        self.controler.post_process()
         if self.countdown_value > 0:
             self.countdown_value -= 1
             self.countdown_timer = self.get_timer(1, self.countdown_tick)
@@ -75,6 +88,7 @@ class DotsMachine(StateMachine):
         else:
             if self.current_state in [self.countdown, self.countdown_confirm_stop]:
                 self.turn_off()
+        self.controler.post_process()
 
     def on_enter_state(self, event, state):
         if self.turn_off_timer is not None:

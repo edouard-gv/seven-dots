@@ -19,9 +19,10 @@ class Timers:
     def __init__(self):
         self.timers = []
 
-    def tick(self):  # the publisj
-        for timer in self.timers:
-            timer.tick()
+    def tick(self, nb_ticks=1):  # the publish
+        for _ in range(nb_ticks):
+            for timer in self.timers:
+                timer.tick()
 
     def subscribe(self, timer):
         self.timers.append(timer)
@@ -122,13 +123,27 @@ def test_launch_2mins_countdown():
     m.victory()
     assert m.current_state.name == "Countdown"
     assert m.countdown_value == 120
-    for _ in range(118):
-        timers.tick()
+    timers.tick(nb_ticks=118)
     assert m.countdown_value == 2
     timers.tick()
     assert m.countdown_value == 1
     timers.tick()
     assert m.countdown_value == 0
+    timers.tick()
+    assert m.current_state.name == "Bye"
+
+
+def test_launch_1mins_countdown():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+    )
+    m.pointing_up()
+    assert m.current_state.name == "Countdown"
+    assert m.countdown_value == 60
+    timers.tick(nb_ticks=59)
+    assert m.countdown_value == 1
+    timers.tick()
     timers.tick()
     assert m.current_state.name == "Bye"
 
@@ -143,8 +158,7 @@ def test_countdown_should_be_put_in_background_until_the_end():
     timers.tick()
     m.open_palm()
     assert m.current_state.name == "Hello"
-    for _ in range(120):
-        timers.tick()
+    timers.tick(nb_ticks=120)
 
 
 def test_countdown_cannot_be_launched_twice():
@@ -157,9 +171,9 @@ def test_countdown_cannot_be_launched_twice():
     m.open_palm()
     timers.tick()
     m.victory()  # should not reset the countdown
-    for _ in range(116):
-        timers.tick()
+    timers.tick(nb_ticks=116)
     assert m.countdown_value == 2
+
 
 def test_when_countdown_stops_during_confirmation():
     timers = Timers()
@@ -178,13 +192,13 @@ def test_when_countdown_stops_during_confirmation():
     assert m.current_state.name == "Bye"
 
 
-
 def test_countdown_should_be_interrupted_by_bye_with_confirmation():
     m = DotsMachine(fake_controler, start_value="hello")
     m.victory()
     m.closed_fist()
     m.thumb_up()
     assert m.current_state.name == "Bye"
+
 
 def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     timers = Timers()
@@ -198,6 +212,7 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     assert m.countdown_running() == True
     assert m.current_state.name == "Countdown"
     assert m.countdown_value == 119
+
 
 def test_countdown_should_be_interrupted_by_bye_in_all_states():
     m = DotsMachine(fake_controler, start_value="hello")
