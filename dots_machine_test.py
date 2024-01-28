@@ -130,7 +130,7 @@ def test_launch_2mins_countdown():
     assert m.current_state.name == "Bye"
 
 
-def test_countdown_can_be_interupted():
+def test_countdown_should_be_put_in_background_until_the_end():
     timers = Timers()
     m = DotsMachine(
         fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
@@ -140,6 +140,23 @@ def test_countdown_can_be_interupted():
     timers.tick()
     m.open_palm()
     assert m.current_state.name == "Hello"
+    for _ in range(120):
+        timers.tick()
+
+
+def test_countdown_cannot_be_launched_twice():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+    )
+    m.victory()
+    timers.tick()
+    m.open_palm()
+    timers.tick()
+    m.victory()  # should reset the countdown
+    for _ in range(118):
+        timers.tick()
+    assert m.countdown_value == 2
 
 
 if __name__ == "__main__":

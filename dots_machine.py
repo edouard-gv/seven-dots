@@ -21,7 +21,7 @@ class DotsMachine(StateMachine):
         | countdown.to(bye)
         | bye.to(bye, internal=True)
     )
-    turn_off = bye.to(blank_screen) | countdown.to(bye)
+    turn_off = bye.to(blank_screen)
     victory = (
         blank_screen.to(countdown)
         | hello.to(countdown)
@@ -47,7 +47,9 @@ class DotsMachine(StateMachine):
         self.turn_off_timer.start()
 
     def on_enter_countdown(self, event, state):
-        self.countdown_value = 120 # 2 minutes
+        self.countdown_value = 120 # 120 ticks are 2 minutes
+        if self.countdown_timer is not None:
+            self.countdown_timer.cancel()
         self.countdown_timer = self.get_timer(1, self.countdown_tick)
         self.countdown_timer.start()
 
@@ -58,7 +60,7 @@ class DotsMachine(StateMachine):
             self.countdown_timer = self.get_timer(1, self.countdown_tick)
             self.countdown_timer.start()
         else:
-            self.turn_off()
+            self.closed_fist()
 
     def on_enter_state(self, event, state):
         if self.turn_off_timer is not None:
