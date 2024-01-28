@@ -34,6 +34,10 @@ class SevenDotsControler:
             self.show()
         if self.machine.current_state.name == "Blank screen":
             self.clear_screen()
+        if self.machine.current_state.name == "Countdown":
+            if self.machine.countdown_value > 0:
+                alphabet.writeCenter(str(int(self.machine.countdown_value)), self.DISPLAY)
+                self.show()
 
     def show(self):
         self.screen.sendPrefix()
