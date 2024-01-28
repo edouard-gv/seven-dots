@@ -111,7 +111,7 @@ def test_dont_turn_off_if_interupted():
     assert m.nb_transitions == 5
 
 
-def test_launch_2min_chronos():
+def test_launch_2mins_countdown():
     timers = Timers()
     m = DotsMachine(
         fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
@@ -128,6 +128,7 @@ def test_launch_2min_chronos():
     assert m.countdown_value == 0
     timers.tick()
     assert m.current_state.name == "Bye"
+
 
 def test_countdown_can_be_interupted():
     timers = Timers()
