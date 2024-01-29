@@ -117,7 +117,7 @@ class DotsMachine(StateMachine):
             self.turn_off_timer.cancel()
             self.turn_off_timer = None
         self.nb_transitions += 1
-        print(f"On '{event}', on the '{state.id}' state.")
+        #print(f"On '{event}', on the '{state.id}' state.")
         # at initialization of the machine, the controler doesn't have the machine yet,
         # but the machine enters the initial state and triggers the enter state event
         if hasattr(self.controler, "machine") and state != self.countdown:
