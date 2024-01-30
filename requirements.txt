@@ -2,3 +2,6 @@ mediapipe
 python-statemachine[diagrams]
 pydot
 Graphviz
+# for raspi:
+# picamera2 should be installed through sudo apt install -y python3-picamera2
+# don't forget to add --system-site-packages option when creating venv
