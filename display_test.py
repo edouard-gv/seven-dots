@@ -1,4 +1,3 @@
-import pytest
 from display import Display
 
 def test_display_initialization():

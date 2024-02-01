@@ -1,5 +1,3 @@
-import time
-from statemachine import State
 from dots_machine import DotsMachine
 
 
@@ -43,6 +41,9 @@ def get_mocked_timer_factory(timers):
         def start(self):
             self.started = True
             timers.subscribe(self)
+            if self.nb_ticks == 0:
+                timers.unsubscribe(self)
+                self.callback()
 
         def cancel(self):
             self.cancelled = True
@@ -64,14 +65,24 @@ def get_mocked_timer_factory(timers):
     return get_mocked_timer
 
 
+def test_initialization():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controler, get_timer=get_mocked_timer_factory(timers)
+    )
+    assert m.current_state.name == "Black screen"
+    timers.tick(2)
+    assert m.current_state.name == "Blank screen"
+    
+
 def test_first_transition():
-    m = DotsMachine(fake_controler)
+    m = DotsMachine(fake_controler, start_value="blank_screen") 
     m.open_palm()
     assert m.current_state.name == "Hello"
 
 
 def test_same_state_on_hello():
-    m = DotsMachine(fake_controler)
+    m = DotsMachine(fake_controler, start_value="blank_screen")
 
     m.open_palm()
     assert m.current_state.name == "Hello"
@@ -79,6 +90,7 @@ def test_same_state_on_hello():
     m.open_palm()
     assert m.current_state.name == "Hello"
     assert m.nb_transitions == 2
+
 
 
 def test_before_turn_off():

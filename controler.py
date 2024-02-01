@@ -13,6 +13,9 @@ class SevenDotsControler:
     def clear_display(self):
         self.DISPLAY = [[0 for j in range(7)] for i in range(4)]
 
+    def fill_display(self):
+        self.DISPLAY = [[0b1111111 for j in range(7)] for i in range(4)]
+
     def process(self, gesture):
         try:
             self.machine.send(gesture.lower())
@@ -28,6 +31,8 @@ class SevenDotsControler:
             alphabet.writeCenter("Bye", self.DISPLAY)
         if self.machine.current_state.name == "Blank screen":
             self.clear_display()
+        if self.machine.current_state.name == "Black screen":
+            self.fill_display()
         if self.machine.current_state.name == "Countdown confirm stop":
             alphabet.writeCenter("Stop ?", self.DISPLAY)
         if self.machine.current_state.name == "Countdown":
