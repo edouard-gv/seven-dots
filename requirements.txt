@@ -5,3 +5,22 @@ Graphviz
 # for raspi:
 # picamera2 should be installed through sudo apt install -y python3-picamera2
 # don't forget to add --system-site-packages option when creating venv
+
+# other requirements
+## set git name and email
+# git config --global user.name "Your Name"
+# git config --global user.email "email@domain.tld"
+## add (manualy) the private key to push on github
+## add the public key to accept connections from vscode
+# on the client ssh-copy-id -i ~/.ssh/<keyfile>.pub name@server
+## activate vnc on the server
+# sudo raspi-config 
+# and navigate to Interfacing Options > VNC > Yes.
+## clone the repo
+## create environment in the local repo directory
+# cd <repo>
+# python3 -m venv .venv
+## activate environment
+# source .venv/bin/activate
+## install requirements without forgetting to add --system-site-packages option
+# pip install -r requirements.txt --system-site-packages
