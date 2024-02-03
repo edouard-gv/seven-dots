@@ -1,12 +1,12 @@
 from dots_machine import DotsMachine
 
 
-class FakeControler:
-    def post_process(self):
+class FakeController:
+    def process_state(self):
         pass
 
 
-fake_controler = FakeControler()
+fake_controller = FakeController()
 
 
 # publish subscribe pattern for faking the timer
@@ -69,7 +69,7 @@ def get_mocked_timer_factory(timers):
 def test_initialization():
     timers = Timers()
     m = DotsMachine(
-        fake_controler, get_timer=get_mocked_timer_factory(timers)
+        fake_controller, get_timer=get_mocked_timer_factory(timers)
     )
     assert m.current_state.name == "Black screen"
     timers.tick(2)
@@ -77,13 +77,13 @@ def test_initialization():
 
 
 def test_first_transition():
-    m = DotsMachine(fake_controler, start_value="blank_screen")
+    m = DotsMachine(fake_controller, start_value="blank_screen")
     m.open_palm()
     assert m.current_state.name == "Hello"
 
 
 def test_same_state_on_hello():
-    m = DotsMachine(fake_controler, start_value="blank_screen")
+    m = DotsMachine(fake_controller, start_value="blank_screen")
 
     m.open_palm()
     assert m.current_state.name == "Hello"
@@ -96,7 +96,7 @@ def test_same_state_on_hello():
 def test_before_turn_off():
     timers = Timers()
     m = DotsMachine(
-        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
     )
     assert m.nb_transitions == 1
     m.closed_fist()
@@ -110,7 +110,7 @@ def test_before_turn_off():
 def test_dont_turn_off_if_interupted():
     timers = Timers()
     m = DotsMachine(
-        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
     )
     assert m.nb_transitions == 1
     m.closed_fist()
@@ -130,7 +130,7 @@ def test_dont_turn_off_if_interupted():
 def test_launch_2mins_countdown():
     timers = Timers()
     m = DotsMachine(
-        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
     )
     m.victory()
     assert m.current_state.name == "Countdown"
@@ -148,7 +148,7 @@ def test_launch_2mins_countdown():
 def test_launch_1mins_countdown():
     timers = Timers()
     m = DotsMachine(
-        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
     )
     m.pointing_up()
     assert m.current_state.name == "Countdown"
@@ -163,7 +163,7 @@ def test_launch_1mins_countdown():
 def test_countdown_should_be_put_in_background_until_the_end():
     timers = Timers()
     m = DotsMachine(
-        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
     )
     m.victory()
     assert m.current_state.name == "Countdown"
@@ -176,7 +176,7 @@ def test_countdown_should_be_put_in_background_until_the_end():
 def test_when_countdown_stops_during_confirmation():
     timers = Timers()
     m = DotsMachine(
-        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
     )
     m.victory()
     for _ in range(119):
@@ -191,7 +191,7 @@ def test_when_countdown_stops_during_confirmation():
 
 
 def test_countdown_should_be_interrupted_by_bye_with_confirmation():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
     m.closed_fist()
     m.thumb_up()
@@ -201,7 +201,7 @@ def test_countdown_should_be_interrupted_by_bye_with_confirmation():
 def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     timers = Timers()
     m = DotsMachine(
-        fake_controler, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
     )
     m.victory()
     timers.tick()
@@ -214,7 +214,7 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
 
 
 def test_countdown_should_be_interrupted_by_bye_in_all_states():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
     m.open_palm()
     m.closed_fist()
@@ -224,7 +224,7 @@ def test_countdown_should_be_interrupted_by_bye_in_all_states():
 
 
 def test_increment_countdown_by_1min():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.pointing_up()
     m.open_palm()
     m.pointing_up()
@@ -232,7 +232,7 @@ def test_increment_countdown_by_1min():
 
 
 def test_increment_countdown_by_2min():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
     m.open_palm()
     m.victory()
@@ -240,7 +240,7 @@ def test_increment_countdown_by_2min():
 
 
 def test_increment_countdown_by_2min_with_none():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
     m.none()
     m.victory()
@@ -248,35 +248,35 @@ def test_increment_countdown_by_2min_with_none():
 
 
 def test_increment_countdown_by_1min_with_no_transitions_v2pu():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
     m.pointing_up()
     assert m.countdown_value == 180
 
 
 def test_increment_countdown_by_1min_with_no_transitions_pu2v():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.pointing_up()
     m.victory()
     assert m.countdown_value == 180
 
 
 def test_no_increment_countdown_when_same_action_pu():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.pointing_up()
     m.pointing_up()
     assert m.countdown_value == 60
 
 
 def test_no_increment_countdown_when_same_action_v():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
     m.victory()
     assert m.countdown_value == 120
 
 
 def test_same_state_for_none():
-    m = DotsMachine(fake_controler, start_value="hello")
+    m = DotsMachine(fake_controller, start_value="hello")
     m.pointing_up()
     m.none()
     nb_transitions = m.nb_transitions
