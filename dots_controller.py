@@ -68,5 +68,5 @@ class SevenDotsController:
 if __name__ == '__main__':
     controller = SevenDotsController()
     controller.outputs.append(MockSerialPort())
-    controller.inputs.append(sevendots.ClassicVideoInput())
+    controller.inputs.append(classic_video_input.ClassicVideoInput())
     controller.start()
