@@ -24,7 +24,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2
 
-from controler import SevenDotsControler #process, init
+from controler import SevenDotsController #process, init
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -38,7 +38,7 @@ START_TIME = time.time()
 def run(model: str, num_hands: int,
         min_hand_detection_confidence: float,
         min_hand_presence_confidence: float, min_tracking_confidence: float,
-        camera_id: int, width: int, height: int) -> None:
+        camera_id: int, width: int, height: int, controller) -> None:
   """Continuously run inference on images acquired from the camera.
 
   Args:
@@ -76,7 +76,7 @@ def run(model: str, num_hands: int,
   recognition_frame = None
   recognition_result_list = []
 
-  seven_dots_controler = SevenDotsControler()
+
   
   def save_result(result: vision.GestureRecognizerResult,
                   unused_output_image: mp.Image, timestamp_ms: int):
@@ -144,7 +144,7 @@ def run(model: str, num_hands: int,
         if recognition_result_list[0].gestures:
           gesture = recognition_result_list[0].gestures[hand_index]
           category_name = gesture[0].category_name
-          seven_dots_controler.process(category_name)
+          controller.process(category_name)
           score = round(gesture[0].score, 2)
           result_text = f'{category_name} ({score})'
 
@@ -195,6 +195,8 @@ def run(model: str, num_hands: int,
   cap.release()
   cv2.destroyAllWindows()
 
+def run_default(controller):
+  run('gesture_recognizer.task', 2, 0.5, 0.5, 0.5, 0, 640, 480, controller)
 
 def main():
   parser = argparse.ArgumentParser(
@@ -232,7 +234,7 @@ def main():
   # Here, we use OpenCV and create a VideoCapture object for each potential ID with 'cap = cv2.VideoCapture(i)'.
   # If 'cap' is None or not 'cap.isOpened()', it indicates the camera ID is not available.
   parser.add_argument(
-      '--cameraId', help='Id of camera.', required=False, default=1)
+      '--cameraId', help='Id of camera.', required=False, default=0)
   parser.add_argument(
       '--frameWidth',
       help='Width of frame to capture from camera.',
@@ -247,7 +249,16 @@ def main():
 
   run(args.model, int(args.numHands), args.minHandDetectionConfidence,
       args.minHandPresenceConfidence, args.minTrackingConfidence,
-      int(args.cameraId), args.frameWidth, args.frameHeight)
+      int(args.cameraId), args.frameWidth, args.frameHeight, SevenDotsController())
+
+class ClassicVideoInput:
+    def start(self, controller):
+        run_default(controller)
+
+    def stop(self):
+        pass # TODO
+
+
 
 if __name__ == '__main__':
   main()

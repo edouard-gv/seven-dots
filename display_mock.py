@@ -1,4 +1,8 @@
 class MockSerialPort:
+
+    def start(self, controller):
+        pass
+
     def sendPrefix(self):
         self.write(0x80)
         self.write(0x83)

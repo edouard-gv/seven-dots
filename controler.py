@@ -1,14 +1,22 @@
 from display_mock import MockSerialPort
 import alphabet
 from dots_machine import DotsMachine
+import sevendots
 import statemachine
 
 
-class SevenDotsControler:
+class SevenDotsController:
     def __init__(self):
-        self.clear_display()
+        self.inputs = []
+        self.outputs = []
+        self.machine = None
+
+    def start(self):
+        for output in self.outputs:
+            output.start(self)
         self.machine = DotsMachine(self)
-        self.screen = MockSerialPort()
+        for input in self.inputs:
+            input.start(self)
 
     def clear_display(self):
         self.DISPLAY = [[0 for j in range(7)] for i in range(4)]
@@ -48,9 +56,17 @@ class SevenDotsControler:
         self.show()
 
     def show(self):
-        self.screen.sendPrefix()
-        for y in range(7):
-            for x in range(4):
-                self.screen.write(self.DISPLAY[x][y])
-        self.screen.sendClose()
-        self.clear_display()
+        for output in self.outputs:
+            output.sendPrefix()
+            for y in range(7):
+                for x in range(4):
+                    output.write(self.DISPLAY[x][y])
+            output.sendClose()
+            self.clear_display()
+
+
+if __name__ == '__main__':
+    controller = SevenDotsController()
+    controller.outputs.append(MockSerialPort())
+    controller.inputs.append(sevendots.ClassicVideoInput())
+    controller.start()

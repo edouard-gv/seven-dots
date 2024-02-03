@@ -72,7 +72,7 @@ class DotsMachine(StateMachine):
         self.previous_action = None
         super(DotsMachine, self).__init__(*args, **kwargs)
 
-    # we are still intializing the machine, so we cannot use the controler yet and 
+    # we are still intializing the machine, so we cannot use the controler yet and
         # we cannot print anything, therefore we switch to the black screen state
         # in another thread
     def on_enter_no_screen(self, event, state):
@@ -135,7 +135,7 @@ class DotsMachine(StateMachine):
         #print(f"On '{event}', on the '{state.id}' state.")
         # at initialization of the machine, the controler doesn't have the machine yet,
         # but the machine enters the initial state and triggers the enter state event
-        if hasattr(self.controler, "machine") and state != self.countdown:
+        if hasattr(self.controler, "machine") and self.controler.machine is not None and state != self.countdown:
             self.controler.post_process()
 
     def countdown_running(self):

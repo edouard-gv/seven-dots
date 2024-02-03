@@ -3,3 +3,4 @@ pyvenv.cfg
 .vscode/settings.json
 __pycache__/
 nohup.out
+.idea/

@@ -25,7 +25,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2
 
-from controler import SevenDotsControler #process, init
+from controler import SevenDotsController #process, init
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -77,7 +77,7 @@ def run(model: str, num_hands: int,
   recognition_frame = None
   recognition_result_list = []
 
-  seven_dots_controler = SevenDotsControler()
+  seven_dots_controler = SevenDotsController()
   
   def save_result(result: vision.GestureRecognizerResult,
                   unused_output_image: mp.Image, timestamp_ms: int):
