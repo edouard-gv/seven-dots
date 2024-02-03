@@ -124,7 +124,7 @@ class DotsMachine(StateMachine):
         else:
             if self.current_state in [self.countdown, self.countdown_confirm_stop]:
                 self.turn_off()
-        self.controler.post_process()
+        self.controler.process_state()
 
     def on_enter_state(self, event, state):
         self.previous_action = event
@@ -136,7 +136,7 @@ class DotsMachine(StateMachine):
         # at initialization of the machine, the controler doesn't have the machine yet,
         # but the machine enters the initial state and triggers the enter state event
         if hasattr(self.controler, "machine") and self.controler.machine is not None and state != self.countdown:
-            self.controler.post_process()
+            self.controler.process_state()
 
     def countdown_running(self):
         return self.countdown_timer is not None and self.countdown_timer.is_alive()
