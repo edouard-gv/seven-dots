@@ -1,4 +1,4 @@
-from display import Display
+from serial_output import Display
 
 def test_display_initialization():
     display = Display()

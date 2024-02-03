@@ -18,14 +18,13 @@ import sys
 import time
 
 import cv2
-from picamera2 import Picamera2
 import mediapipe as mp
 
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2
 
-from controller import SevenDotsController #process, init
+from dots_controller import SevenDotsController #process, init
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -39,7 +38,7 @@ START_TIME = time.time()
 def run(model: str, num_hands: int,
         min_hand_detection_confidence: float,
         min_hand_presence_confidence: float, min_tracking_confidence: float,
-        camera_id: int, width: int, height: int) -> None:
+        camera_id: int, width: int, height: int, controller) -> None:
   """Continuously run inference on images acquired from the camera.
 
   Args:
@@ -57,9 +56,9 @@ def run(model: str, num_hands: int,
   """
 
   # Start capturing video input from the camera
-  picam2 = Picamera2()
-  picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (width, height)}))
-  picam2.start()
+  cap = cv2.VideoCapture(camera_id)
+  cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+  cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
   # Visualization parameters
   row_size = 50  # pixels
@@ -77,7 +76,7 @@ def run(model: str, num_hands: int,
   recognition_frame = None
   recognition_result_list = []
 
-  seven_dots_controler = SevenDotsController()
+
   
   def save_result(result: vision.GestureRecognizerResult,
                   unused_output_image: mp.Image, timestamp_ms: int):
@@ -103,8 +102,12 @@ def run(model: str, num_hands: int,
   recognizer = vision.GestureRecognizer.create_from_options(options)
 
   # Continuously capture images from the camera and run inference
-  while True:
-    image = picam2.capture_array()
+  while cap.isOpened():
+    success, image = cap.read()
+    if not success:
+      sys.exit(
+          'ERROR: Unable to read from webcam. Please verify your webcam settings.'
+      )
 
     image = cv2.flip(image, 1)
 
@@ -141,7 +144,7 @@ def run(model: str, num_hands: int,
         if recognition_result_list[0].gestures:
           gesture = recognition_result_list[0].gestures[hand_index]
           category_name = gesture[0].category_name
-          seven_dots_controler.process(category_name)
+          controller.process(category_name)
           score = round(gesture[0].score, 2)
           result_text = f'{category_name} ({score})'
 
@@ -171,14 +174,12 @@ def run(model: str, num_hands: int,
                                           z=landmark.z) for landmark in
           hand_landmarks
         ])
-
-        #the next chunck raises a ValueError: Input image must contain three channel bgr data.
-        """mp_drawing.draw_landmarks(
+        mp_drawing.draw_landmarks(
           current_frame,
           hand_landmarks_proto,
           mp_hands.HAND_CONNECTIONS,
           mp_drawing_styles.get_default_hand_landmarks_style(),
-          mp_drawing_styles.get_default_hand_connections_style())"""
+          mp_drawing_styles.get_default_hand_connections_style())
 
       recognition_frame = current_frame
       recognition_result_list.clear()
@@ -191,8 +192,11 @@ def run(model: str, num_hands: int,
         break
 
   recognizer.close()
+  cap.release()
   cv2.destroyAllWindows()
 
+def run_default(controller):
+  run('gesture_recognizer.task', 2, 0.5, 0.5, 0.5, 0, 640, 480, controller)
 
 def main():
   parser = argparse.ArgumentParser(
@@ -230,7 +234,7 @@ def main():
   # Here, we use OpenCV and create a VideoCapture object for each potential ID with 'cap = cv2.VideoCapture(i)'.
   # If 'cap' is None or not 'cap.isOpened()', it indicates the camera ID is not available.
   parser.add_argument(
-      '--cameraId', help='Id of camera.', required=False, default=-1) #no usage with picamera2
+      '--cameraId', help='Id of camera.', required=False, default=0)
   parser.add_argument(
       '--frameWidth',
       help='Width of frame to capture from camera.',
@@ -245,7 +249,16 @@ def main():
 
   run(args.model, int(args.numHands), args.minHandDetectionConfidence,
       args.minHandPresenceConfidence, args.minTrackingConfidence,
-      int(args.cameraId), args.frameWidth, args.frameHeight)
+      int(args.cameraId), args.frameWidth, args.frameHeight, SevenDotsController())
+
+class ClassicVideoInput:
+    def start(self, controller):
+        run_default(controller)
+
+    def stop(self):
+        pass # TODO
+
+
 
 if __name__ == '__main__':
   main()

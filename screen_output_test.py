@@ -1,4 +1,4 @@
-from display_mock import MockSerialPort, convert
+from screen_output import MockSerialPort, convert
 
 def sendPrefix(port):
     port.write(0x80)

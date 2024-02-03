@@ -1,7 +1,7 @@
-from display_mock import MockSerialPort
+from screen_output import MockSerialPort
 import alphabet
 from dots_machine import DotsMachine
-import sevendots
+import classic_video_input
 import statemachine
 
 
