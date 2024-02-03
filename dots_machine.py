@@ -1,4 +1,5 @@
 import threading
+
 from statemachine import StateMachine, State
 
 
@@ -13,49 +14,49 @@ class DotsMachine(StateMachine):
     countdown_confirm_stop = State()
 
     open_palm = (
-        blank_screen.to(hello)
-        | bye.to(hello)
-        | countdown.to(hello)
-        | hello.to(hello, internal=True)
+            blank_screen.to(hello)
+            | bye.to(hello)
+            | countdown.to(hello)
+            | hello.to(hello, internal=True)
     )
     closed_fist = (
-        blank_screen.to(bye)
-        | hello.to(bye, unless="countdown_running")
-        | hello.to(countdown_confirm_stop, cond="countdown_running")
-        | countdown.to(countdown_confirm_stop)
-        | bye.to(bye, internal=True)
-        | countdown_confirm_stop.to(countdown_confirm_stop, internal=True)
+            blank_screen.to(bye)
+            | hello.to(bye, unless="countdown_running")
+            | hello.to(countdown_confirm_stop, cond="countdown_running")
+            | countdown.to(countdown_confirm_stop)
+            | bye.to(bye, internal=True)
+            | countdown_confirm_stop.to(countdown_confirm_stop, internal=True)
     )
     turn_off = black_screen.to(blank_screen) | bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
 
     check_screen = no_screen.to(black_screen)
 
     victory = (
-        blank_screen.to(countdown, on="set_countdown_to_120")
-        | hello.to(countdown, on="set_countdown_to_120")
-        | bye.to(countdown, on="set_countdown_to_120")
-        | countdown.to(countdown, on="set_countdown_to_120", unless="action_was_victory")
-        | countdown.to(countdown, cond="action_was_victory", internal=True)
+            blank_screen.to(countdown, on="set_countdown_to_120")
+            | hello.to(countdown, on="set_countdown_to_120")
+            | bye.to(countdown, on="set_countdown_to_120")
+            | countdown.to(countdown, on="set_countdown_to_120", unless="action_was_victory")
+            | countdown.to(countdown, cond="action_was_victory", internal=True)
     )
 
     pointing_up = (
-        blank_screen.to(countdown, on="set_countdown_to_60")
-        | hello.to(countdown, on="set_countdown_to_60")
-        | bye.to(countdown, on="set_countdown_to_60")
-        | countdown.to(countdown, on="set_countdown_to_60", unless="action_was_pointing_up")
-        | countdown.to(countdown, cond="action_was_pointing_up", internal=True)
+            blank_screen.to(countdown, on="set_countdown_to_60")
+            | hello.to(countdown, on="set_countdown_to_60")
+            | bye.to(countdown, on="set_countdown_to_60")
+            | countdown.to(countdown, on="set_countdown_to_60", unless="action_was_pointing_up")
+            | countdown.to(countdown, cond="action_was_pointing_up", internal=True)
     )
 
     none = (
-        countdown.to(countdown, unless="action_was_none")
-        | countdown.to(countdown, cond="action_was_none", internal=True)
+            countdown.to(countdown, unless="action_was_none")
+            | countdown.to(countdown, cond="action_was_none", internal=True)
     )
 
     thumb_up = countdown_confirm_stop.to(bye) | bye.to(bye, internal=True)
 
     thumb_down = (
-        countdown_confirm_stop.to(countdown) 
-        | countdown.to(countdown, internal=True)
+            countdown_confirm_stop.to(countdown)
+            | countdown.to(countdown, internal=True)
     )
 
     # timer factory that can be overiden for testing
@@ -73,8 +74,8 @@ class DotsMachine(StateMachine):
         super(DotsMachine, self).__init__(*args, **kwargs)
 
     # we are still intializing the machine, so we cannot use the controler yet and
-        # we cannot print anything, therefore we switch to the black screen state
-        # in another thread
+    # we cannot print anything, therefore we switch to the black screen state
+    # in another thread
     def on_enter_no_screen(self, event, state):
         self.turn_off_timer = self.get_timer(0, self.check_screen)
         self.turn_off_timer.start()
@@ -132,7 +133,7 @@ class DotsMachine(StateMachine):
             self.turn_off_timer.cancel()
             self.turn_off_timer = None
         self.nb_transitions += 1
-        #print(f"On '{event}', on the '{state.id}' state.")
+        # print(f"On '{event}', on the '{state.id}' state.")
         # at initialization of the machine, the controler doesn't have the machine yet,
         # but the machine enters the initial state and triggers the enter state event
         if hasattr(self.controler, "machine") and self.controler.machine is not None and state != self.countdown:

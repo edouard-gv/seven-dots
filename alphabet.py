@@ -76,6 +76,7 @@ def writeCenter(text, DISPLAY):
         spaces += " "
     write(spaces + text, DISPLAY)
 
+
 # converting seconds to time
 def print_seconds(seconds):
     minutes = seconds // 60

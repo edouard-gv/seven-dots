@@ -8,6 +8,7 @@ class FakeControler:
 
 fake_controler = FakeControler()
 
+
 # publish subscribe pattern for faking the timer
 # https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
 # https://pypi.org/project/pubsub/
@@ -73,10 +74,10 @@ def test_initialization():
     assert m.current_state.name == "Black screen"
     timers.tick(2)
     assert m.current_state.name == "Blank screen"
-    
+
 
 def test_first_transition():
-    m = DotsMachine(fake_controler, start_value="blank_screen") 
+    m = DotsMachine(fake_controler, start_value="blank_screen")
     m.open_palm()
     assert m.current_state.name == "Hello"
 
@@ -90,7 +91,6 @@ def test_same_state_on_hello():
     m.open_palm()
     assert m.current_state.name == "Hello"
     assert m.nb_transitions == 2
-
 
 
 def test_before_turn_off():
@@ -210,7 +210,7 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     assert m.countdown_running() == True
     assert m.current_state.name == "Countdown"
     assert m.countdown_value == 119
-    m.countdown_timer.cancel()    
+    m.countdown_timer.cancel()
 
 
 def test_countdown_should_be_interrupted_by_bye_in_all_states():
@@ -253,11 +253,13 @@ def test_increment_countdown_by_1min_with_no_transitions_v2pu():
     m.pointing_up()
     assert m.countdown_value == 180
 
+
 def test_increment_countdown_by_1min_with_no_transitions_pu2v():
     m = DotsMachine(fake_controler, start_value="hello")
     m.pointing_up()
     m.victory()
     assert m.countdown_value == 180
+
 
 def test_no_increment_countdown_when_same_action_pu():
     m = DotsMachine(fake_controler, start_value="hello")
@@ -265,11 +267,13 @@ def test_no_increment_countdown_when_same_action_pu():
     m.pointing_up()
     assert m.countdown_value == 60
 
+
 def test_no_increment_countdown_when_same_action_v():
     m = DotsMachine(fake_controler, start_value="hello")
     m.victory()
     m.victory()
     assert m.countdown_value == 120
+
 
 def test_same_state_for_none():
     m = DotsMachine(fake_controler, start_value="hello")

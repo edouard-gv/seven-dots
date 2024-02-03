@@ -1,8 +1,9 @@
-from display_computer import compute_display
-from screen_output import MockSerialPort
-from dots_machine import DotsMachine
-import classic_video_input
 import statemachine
+
+import classic_video_input
+from display_computer import compute_display
+from dots_machine import DotsMachine
+from screen_output import MockSerialPort
 
 
 class SevenDotsController:

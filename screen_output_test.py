@@ -1,22 +1,26 @@
 from screen_output import MockSerialPort, convert
 
+
 def sendPrefix(port):
     port.write(0x80)
     port.write(0x83)
     port.write(0x00)
 
+
 def sendClose(port):
     port.write(0x8F)
+
 
 def sendBytes(port, *bytes):
     for byte in bytes:
         port.write(byte)
-    
+
+
 def test_noprint_digit():
     port = MockSerialPort()
     sendPrefix(port)
     sendClose(port)
-    assert '\n'+port.output.replace(" ", ".") == \
+    assert '\n' + port.output.replace(" ", ".") == \
 """
 ...........................
 ...........................
@@ -34,6 +38,7 @@ def test_noprint_digit():
 ...........................
 ...........................
 """
+
 
 def test_oneprint_digit():
     port = MockSerialPort()
@@ -61,6 +66,7 @@ def test_oneprint_digit():
 ...........................
 """
 
+
 def test_twoprint_digit():
     port = MockSerialPort()
     sendPrefix(port)
@@ -86,6 +92,7 @@ def test_twoprint_digit():
 ...........................
 ...........................
 """
+
 
 def test_threeprint_digit():
     port = MockSerialPort()
@@ -114,6 +121,7 @@ def test_threeprint_digit():
 ...........................
 """
 
+
 def test_full_line_print_digit():
     port = MockSerialPort()
     sendPrefix(port)
@@ -141,17 +149,20 @@ def test_full_line_print_digit():
 ...........................
 """
 
+
 def test_convert_first_segment():
     assert convert(0b0000001) == [
         '   ',
         ' _ ',
         '   ']
 
+
 def test_convert_first_and_second_segments():
     assert convert(0b0000011) == [
         '   ',
         '|_ ',
         '   ']
+
 
 def test_for_fun():
     port = MockSerialPort()

@@ -1,13 +1,16 @@
 from serial_output import Display
 
+
 def test_display_initialization():
     display = Display()
     assert True  # Replace with real test
+
 
 def test_update_display():
     display = Display()
     display.update_display()
     assert True  # Replace with real test
+
 
 def test_new_frame():
     display = Display()

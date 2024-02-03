@@ -1,5 +1,6 @@
 import copy
 
+
 class Display:
     def __init__(self):
         self.UW = 7
@@ -31,10 +32,10 @@ class Display:
                     return True
         return False
 
+
 class SerialPort:
-    def __init__(port = 0):
+    def __init__(port=0):
         pass
 
     def write(self, i):
         print(i)
-

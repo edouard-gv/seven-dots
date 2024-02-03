@@ -75,4 +75,4 @@ def convert(c):
 
 
 def show_digit(byte, bit, symbol):
-    return symbol if byte & 2**bit else " "
+    return symbol if byte & 2 ** bit else " "
