@@ -34,12 +34,13 @@ mp_drawing_styles = mp.solutions.drawing_styles
 # Global variables to calculate FPS
 COUNTER, FPS = 0, 0
 START_TIME = time.time()
+stop = False
 
 
 def run(model: str, num_hands: int,
         min_hand_detection_confidence: float,
         min_hand_presence_confidence: float, min_tracking_confidence: float,
-        camera_id: int, width: int, height: int) -> None:
+        camera_id: int, width: int, height: int, controller) -> None:
     """Continuously run inference on images acquired from the camera.
 
     Args:
@@ -62,22 +63,10 @@ def run(model: str, num_hands: int,
     picam2.start()
 
     # Visualization parameters
-    row_size = 50  # pixels
-    left_margin = 24  # pixels
-    text_color = (0, 0, 0)  # black
-    font_size = 1
-    font_thickness = 1
     fps_avg_frame_count = 10
 
     # Label box parameters
-    label_text_color = (255, 255, 255)  # white
-    label_font_size = 1
-    label_thickness = 2
-
-    recognition_frame = None
     recognition_result_list = []
-
-    seven_dots_controler = SevenDotsController()
 
     def save_result(result: vision.GestureRecognizerResult,
                     unused_output_image: mp.Image, timestamp_ms: int):
@@ -115,84 +104,25 @@ def run(model: str, num_hands: int,
         # Run gesture recognizer using the model.
         recognizer.recognize_async(mp_image, time.time_ns() // 1_000_000)
 
-        # Show the FPS
-        fps_text = 'FPS = {:.1f}'.format(FPS)
-        text_location = (left_margin, row_size)
-        current_frame = image
-        cv2.putText(current_frame, fps_text, text_location, cv2.FONT_HERSHEY_DUPLEX,
-                    font_size, text_color, font_thickness, cv2.LINE_AA)
-
         if recognition_result_list:
-            # Draw landmarks and write the text for each hand.
             for hand_index, hand_landmarks in enumerate(
                     recognition_result_list[0].hand_landmarks):
-                # Calculate the bounding box of the hand
-                x_min = min([landmark.x for landmark in hand_landmarks])
-                y_min = min([landmark.y for landmark in hand_landmarks])
-                y_max = max([landmark.y for landmark in hand_landmarks])
-
-                # Convert normalized coordinates to pixel values
-                frame_height, frame_width = current_frame.shape[:2]
-                x_min_px = int(x_min * frame_width)
-                y_min_px = int(y_min * frame_height)
-                y_max_px = int(y_max * frame_height)
-
-                # Get gesture classification results
                 if recognition_result_list[0].gestures:
                     gesture = recognition_result_list[0].gestures[hand_index]
                     category_name = gesture[0].category_name
-                    seven_dots_controler.process_command(category_name)
+                    controller.process_command(category_name)
                     score = round(gesture[0].score, 2)
-                    result_text = f'{category_name} ({score})'
-
-                    # Compute text size
-                    text_size = \
-                        cv2.getTextSize(result_text, cv2.FONT_HERSHEY_DUPLEX, label_font_size,
-                                        label_thickness)[0]
-                    text_width, text_height = text_size
-
-                    # Calculate text position (above the hand)
-                    text_x = x_min_px
-                    text_y = y_min_px - 10  # Adjust this value as needed
-
-                    # Make sure the text is within the frame boundaries
-                    if text_y < 0:
-                        text_y = y_max_px + text_height
-
-                    # Draw the text
-                    cv2.putText(current_frame, result_text, (text_x, text_y),
-                                cv2.FONT_HERSHEY_DUPLEX, label_font_size,
-                                label_text_color, label_thickness, cv2.LINE_AA)
-
-                # Draw hand landmarks on the frame
-                hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-                hand_landmarks_proto.landmark.extend([
-                    landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y,
-                                                    z=landmark.z) for landmark in
-                    hand_landmarks
-                ])
-
-                # the next chunck raises a ValueError: Input image must contain three channel bgr data.
-                """mp_drawing.draw_landmarks(
-                  current_frame,
-                  hand_landmarks_proto,
-                  mp_hands.HAND_CONNECTIONS,
-                  mp_drawing_styles.get_default_hand_landmarks_style(),
-                  mp_drawing_styles.get_default_hand_connections_style())"""
-
-            recognition_frame = current_frame
             recognition_result_list.clear()
-
-        if recognition_frame is not None:
-            cv2.imshow('gesture_recognition', recognition_frame)
-
-        # Stop the program if the ESC key is pressed.
-        if cv2.waitKey(1) == 27:
+        
+        if stop:
             break
 
     recognizer.close()
-    cv2.destroyAllWindows()
 
+
+
+def run_default(controller):
+    run('gesture_recognizer.task', 2, 0.5, 0.5, 0.5, 0, 640, 480, controller)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -245,4 +175,13 @@ def main():
 
     run(args.model, int(args.numHands), args.minHandDetectionConfidence,
         args.minHandPresenceConfidence, args.minTrackingConfidence,
-        int(args.cameraId), args.frameWidth, args.frameHeight)
+        int(args.cameraId), args.frameWidth, args.frameHeight, SevenDotsController())
+
+
+class VideoInput:
+    def start(self, controller):
+        run_default(controller)
+
+    def stop(self):
+        global stop
+        stop = True

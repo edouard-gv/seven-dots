@@ -3,15 +3,6 @@ class MockSerialPort:
     def start(self, controller):
         pass
 
-    def sendPrefix(self):
-        self.write(0x80)
-        self.write(0x83)
-        self.write(0x00)
-
-    def sendClose(self):
-        self.write(0x8F)
-        print(self.output)
-
     def sendBytes(self, *bytes):
         for byte in bytes:
             self.write(byte)
@@ -37,8 +28,9 @@ class MockSerialPort:
             if c == 0x00:
                 self.in_header = False
                 return
-        if c == 0x8F:
+        if c == 0x83 and not self.in_header:
             self.compute_output()
+            print(self.output)
             return
         convertion = convert(c)
         for subline_nb in range(3):

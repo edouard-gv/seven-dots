@@ -1,18 +1,13 @@
-from serial_output import Display
+from dots_controller import Display
+from serial_output import SerialPort
 
+disp = Display(SerialPort())
+UW = 7
+UH = 4
+black = [[0b1111111 for _ in range(UW)] for _ in range(UH)]
+white = [[0 for _ in range(UW)] for _ in range(UH)]
 
-def test_display_initialization():
-    display = Display()
-    assert True  # Replace with real test
-
-
-def test_update_display():
-    display = Display()
-    display.update_display()
-    assert True  # Replace with real test
-
-
-def test_new_frame():
-    display = Display()
-    result = display.new_frame()
-    assert True  # Replace with real test
+disp.start(None)
+disp.update_display(white)
+disp.update_display(black)
+disp.update_display(white)

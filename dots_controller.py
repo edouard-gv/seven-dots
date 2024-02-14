@@ -1,10 +1,44 @@
 import statemachine
+import copy
 
 import classic_video_input
+import raspi_video_input
 from display_computer import compute_display
 from dots_machine import DotsMachine
 from screen_output import MockSerialPort
+from serial_output import SerialPort
 
+class Display:
+    def __init__(self, output):
+        self.UW = 7
+        self.UH = 4
+        self.DISPLAY_copy = [[0 for _ in range(self.UW)] for _ in range(self.UH)]
+        self.output = output
+
+    def start(self, controler):
+        self.output.start(controler)
+
+    def update_display(self, disp):
+        if self.new_frame(disp):
+            self.output.write(0x80)
+            self.output.write(0x83)
+            self.output.write(0x00)
+
+            for j in range(self.UW):
+                for i in range(self.UH):
+                    d = disp[i][j]
+                    self.output.write(d)
+
+            self.output.write(0x83)
+
+        self.DISPLAY_copy = copy.deepcopy(disp)
+
+    def new_frame(self, disp):
+        for j in range(self.UW):
+            for i in range(self.UH):
+                if disp[i][j] != self.DISPLAY_copy[i][j]:
+                    return True
+        return False
 
 class SevenDotsController:
     def __init__(self):
@@ -33,16 +67,15 @@ class SevenDotsController:
         self.display()
 
     def display(self):
-        for output in self.outputs:
-            output.sendPrefix()
-            for y in range(7):
-                for x in range(4):
-                    output.write(self.DISPLAY[x][y])
-            output.sendClose()
+        for disp in self.outputs:
+            disp.update_display(self.DISPLAY)
+            
 
 
 if __name__ == '__main__':
     controller = SevenDotsController()
-    controller.outputs.append(MockSerialPort())
-    controller.inputs.append(classic_video_input.ClassicVideoInput())
+    controller.outputs.append(Display(MockSerialPort()))
+    controller.outputs.append(Display(SerialPort()))
+    #controller.inputs.append(classic_video_input.VideoInput())
+    controller.inputs.append(raspi_video_input.VideoInput())
     controller.start()

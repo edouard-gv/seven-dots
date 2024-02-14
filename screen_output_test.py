@@ -8,7 +8,7 @@ def sendPrefix(port):
 
 
 def sendClose(port):
-    port.write(0x8F)
+    port.write(0x83)
 
 
 def sendBytes(port, *bytes):

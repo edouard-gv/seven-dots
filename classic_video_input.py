@@ -251,7 +251,7 @@ def main():
         int(args.cameraId), args.frameWidth, args.frameHeight, SevenDotsController())
 
 
-class ClassicVideoInput:
+class VideoInput:
     def start(self, controller):
         run_default(controller)
 
