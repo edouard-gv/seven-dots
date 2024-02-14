@@ -45,3 +45,14 @@ git config --global user.email "email@domain.tld"
 ```
 
 
+## Testing serial
+```python
+import serial
+ser = serial.Serial(port='/dev/serial0', baudrate=9600)
+# should answer True
+ser.isOpen()
+# should answer 32 and print "-" every where
+ser.write(bytes([0x80, 0x83, 0x00]+[0b1]*28+[0x83]))
+# equivalent
+ser.write(b'\x80\x83\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x83')
+```
