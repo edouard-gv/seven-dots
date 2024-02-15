@@ -28,7 +28,7 @@ class MockSerialPort:
             if c == 0x00:
                 self.in_header = False
                 return
-        if c == 0x83 and not self.in_header:
+        if c == 0x8F and not self.in_header:
             self.compute_output()
             print(self.output)
             return

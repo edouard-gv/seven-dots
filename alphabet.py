@@ -71,7 +71,7 @@ def write(text, DISPLAY, line_shift=0, column_shift=0):
 
 def writeCenter(text, DISPLAY):
     spaces = ""
-    spacesLength = (7 // 2 - 1) * 7 + (7 - len(text)) // 2
+    spacesLength = 7 + (7 - len(text)) // 2
     for i in range(spacesLength):
         spaces += " "
     write(spaces + text, DISPLAY)

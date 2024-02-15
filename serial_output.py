@@ -6,10 +6,8 @@ class SerialPort:
 
     def start(self, controller):
         self.ser = serial.Serial('/dev/serial0')
-        self.ser.baudrate = 9600
+        self.ser.baudrate = 57600
         print(self.ser)
 
     def write(self, i):
         self.ser.write(bytes([i]))
-        print(bytes([i]))
-

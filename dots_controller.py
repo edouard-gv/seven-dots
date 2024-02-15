@@ -24,12 +24,12 @@ class Display:
             self.output.write(0x83)
             self.output.write(0x00)
 
-            for j in range(self.UW):
-                for i in range(self.UH):
+            for i in range(self.UH):
+                for j in range(self.UW):
                     d = disp[i][j]
                     self.output.write(d)
 
-            self.output.write(0x83)
+            self.output.write(0x8F)
 
         self.DISPLAY_copy = copy.deepcopy(disp)
 
