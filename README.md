@@ -48,11 +48,16 @@ git config --global user.email "email@domain.tld"
 ## Testing serial
 ```python
 import serial
-ser = serial.Serial(port='/dev/serial0', baudrate=9600)
+ser = serial.Serial(port='/dev/serial0', baudrate=57600)
 # should answer True
 ser.isOpen()
+# should print Serial<id=0x........, open=True>(port='/dev/serial0', baudrate=57600, bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=False, rtscts=False, dsrdtr=False)
+print(ser)
 # should answer 32 and print "-" every where
-ser.write(bytes([0x80, 0x83, 0x00]+[0b1]*28+[0x83]))
+ser.write(bytes([0x80, 0x83, 0x00]+[0b1]*28+[0x8F]))
 # equivalent
-ser.write(b'\x80\x83\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x83')
+ser.write(b'\x80\x83\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x8F')
 ```
+
+# Troubleshooting
+If when instantiating ser, you have `FileNotFoundError: [Errno 2] No such file or directory: '/dev/serial0'`, be sure to have activated Serial in raspi-config (No to console on serial / yes to serial interface, cf 1.)
