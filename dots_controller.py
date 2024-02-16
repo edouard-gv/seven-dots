@@ -2,12 +2,13 @@ import copy
 
 import statemachine
 
-import classic_video_input
-import raspi_video_input
+from inputs import classic_video_input
+from inputs import raspi_video_input
 from display_computer import compute_display
 from dots_machine import DotsMachine
-from screen_output import MockSerialPort
-from serial_output import SerialPort
+from outputs.screen_output import ScreenPort
+from outputs.serial_output import SerialPort
+
 
 class Display:
     def __init__(self, output):
@@ -75,7 +76,7 @@ class SevenDotsController:
 
 if __name__ == '__main__':
     main_controller = SevenDotsController()
-    main_controller.outputs.append(Display(MockSerialPort()))
+    main_controller.outputs.append(Display(ScreenPort()))
     main_controller.outputs.append(Display(SerialPort()))
     # main_controller.inputs.append(classic_video_input.VideoInput())
     main_controller.inputs.append(raspi_video_input.VideoInput())

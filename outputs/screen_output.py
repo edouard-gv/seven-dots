@@ -1,4 +1,4 @@
-class MockSerialPort:
+class ScreenPort:
 
     def start(self, controller):
         pass

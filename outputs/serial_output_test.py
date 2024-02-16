@@ -1,7 +1,7 @@
 from time import sleep
 
 from dots_controller import Display
-from serial_output import SerialPort
+from outputs.serial_output import SerialPort
 
 disp = Display(SerialPort())
 UW = 7

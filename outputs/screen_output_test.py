@@ -1,5 +1,5 @@
 from dots_controller import Display
-from screen_output import MockSerialPort, convert
+from screen_output import ScreenPort, convert
 
 
 def send_prefix(port):
@@ -29,7 +29,7 @@ def test_transpose():
 
 
 def test_noprint_digit():
-    port = MockSerialPort()
+    port = ScreenPort()
     send_prefix(port)
     send_close(port)
     assert '\n' + port.output.replace(" ", ".") == \
@@ -53,7 +53,7 @@ def test_noprint_digit():
 
 
 def test_oneprint_digit():
-    port = MockSerialPort()
+    port = ScreenPort()
     send_prefix(port)
     send_bytes(port, 0b1111111)
     send_close(port)
@@ -80,7 +80,7 @@ def test_oneprint_digit():
 
 
 def test_two_print_digit_integrating_display():
-    port = MockSerialPort()
+    port = ScreenPort()
     display = Display(port)
     display_array = [[0 for j in range(7)] for i in range(4)]
     display_array[0][0] = 0b1111111
@@ -107,7 +107,7 @@ def test_two_print_digit_integrating_display():
 """
 
 def test_two_print_digit():
-    port = MockSerialPort()
+    port = ScreenPort()
     send_prefix(port)
     send_bytes(port, 0b1111111, 0b1111111)
     send_close(port)
@@ -134,7 +134,7 @@ def test_two_print_digit():
 
 
 def test_three_print_digit():
-    port = MockSerialPort()
+    port = ScreenPort()
     send_prefix(port)
     send_bytes(port, 0b1111111, 0b1111111, 0x00, 0x00, 0x00, 0x00, 0x00)
     send_bytes(port, 0b1111111)
@@ -162,7 +162,7 @@ def test_three_print_digit():
 
 
 def test_full_line_print_digit():
-    port = MockSerialPort()
+    port = ScreenPort()
     send_prefix(port)
     for _ in range(7):
         send_bytes(port, 0b1111111)
@@ -204,7 +204,7 @@ def test_convert_first_and_second_segments():
 
 
 def test_for_fun():
-    port = MockSerialPort()
+    port = ScreenPort()
     send_prefix(port)
     for i in range(28):
         send_bytes(port, i)
