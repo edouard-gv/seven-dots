@@ -12,11 +12,8 @@ class MockSerialPort:
         self.output = ""
 
     def reset(self):
-        self.line_nb = 0
-        self.lines = []
         self.in_header = True
-        for i in range(4):
-            self.lines += [[[], [], []]]
+        self.frame_bytes = []
 
     def write(self, c):
         if c == 0x80:
@@ -32,31 +29,25 @@ class MockSerialPort:
             self.compute_output()
             print(self.output)
             return
-        conversion = convert(c)
-        for subline_nb in range(3):
-            self.lines[self.line_nb][subline_nb] += [conversion[subline_nb]]
-        self.line_nb = (self.line_nb + 1) % 4
+        self.frame_bytes.append(c)
 
     def compute_output(self):
+        for p in range(4*7-len(self.frame_bytes)):
+            self.frame_bytes.append(0)
+        bytes_lines = [
+            self.frame_bytes[i * 7: (i + 1) * 7] for i in range(4)
+        ]
 
-        def structured_to_string(structured_fragment):
-            return " ".join(structured_fragment).ljust(7 * 4 - 1) + "\n"
+        lines_of_lines = []
 
-        subline_string_list = []
+        for byte_line in bytes_lines:
+            converted_lines_to_transpose = [convert(b) for b in byte_line]
+            converted_lines = [list(x) for x in list(zip(*converted_lines_to_transpose))]
+            lines = [" ".join(line) + "\n" for line in converted_lines]
+            lines_of_lines.append("".join(lines))
 
-        empty_line = " " * (7 * 4 - 1) + "\n"
-
-        for line in self.lines:
-            subline_string_list += [
-                "".join(
-                    [
-                        structured_to_string(structured_subline)
-                        for structured_subline in line
-                    ]
-                )
-            ]
-
-        self.output = empty_line.join(subline_string_list)
+        blank_line = " " * (7 * 4 - 1) + "\n"
+        self.output = blank_line.join(lines_of_lines)
 
 
 def convert(c):
