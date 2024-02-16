@@ -3,8 +3,8 @@ class MockSerialPort:
     def start(self, controller):
         pass
 
-    def sendBytes(self, *bytes):
-        for byte in bytes:
+    def send_bytes(self, *frame_bytes):
+        for byte in frame_bytes:
             self.write(byte)
 
     def __init__(self) -> None:
@@ -28,16 +28,17 @@ class MockSerialPort:
             if c == 0x00:
                 self.in_header = False
                 return
-        if c == 0x8F and not self.in_header:
+        if c == 0x8F:
             self.compute_output()
             print(self.output)
             return
-        convertion = convert(c)
+        conversion = convert(c)
         for subline_nb in range(3):
-            self.lines[self.line_nb][subline_nb] += [convertion[subline_nb]]
+            self.lines[self.line_nb][subline_nb] += [conversion[subline_nb]]
         self.line_nb = (self.line_nb + 1) % 4
 
     def compute_output(self):
+
         def structured_to_string(structured_fragment):
             return " ".join(structured_fragment).ljust(7 * 4 - 1) + "\n"
 

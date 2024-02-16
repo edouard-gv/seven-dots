@@ -61,3 +61,9 @@ ser.write(b'\x80\x83\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01
 
 # Troubleshooting
 If when instantiating ser, you have `FileNotFoundError: [Errno 2] No such file or directory: '/dev/serial0'`, be sure to have activated Serial in raspi-config (No to console on serial / yes to serial interface, cf 1.)
+
+You can also try to access to the serial port with stty, for example:
+```bash
+stty -F /dev/serial0 speed 57600 cs8 -cstopb -parenb -echo
+echo -en '\x80\x83\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x8F' > /dev/ttyUSB0
+```

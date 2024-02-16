@@ -14,16 +14,13 @@
 """Main scripts to run gesture recognition."""
 
 import argparse
-import sys
 import time
 
 import cv2
-from picamera2 import Picamera2
 import mediapipe as mp
-
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from mediapipe.framework.formats import landmark_pb2
+from picamera2 import Picamera2
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -112,16 +109,16 @@ def run(model: str, num_hands: int,
                         controller.process_command(category_name)
                     score = round(gesture[0].score, 2)
             recognition_result_list.clear()
-        
+
         if stop:
             break
 
     recognizer.close()
 
 
-
 def run_default(controller):
     run('gesture_recognizer.task', 2, 0.5, 0.5, 0.5, 0, 640, 480, controller)
+
 
 def main():
     parser = argparse.ArgumentParser(

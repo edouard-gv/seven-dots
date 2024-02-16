@@ -1,4 +1,5 @@
 from time import sleep
+
 from dots_controller import Display
 from serial_output import SerialPort
 

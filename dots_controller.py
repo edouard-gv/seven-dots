@@ -1,5 +1,6 @@
-import statemachine
 import copy
+
+import statemachine
 
 import classic_video_input
 import raspi_video_input
@@ -15,8 +16,8 @@ class Display:
         self.DISPLAY_copy = [[0 for _ in range(self.UW)] for _ in range(self.UH)]
         self.output = output
 
-    def start(self, controler):
-        self.output.start(controler)
+    def start(self, controller):
+        self.output.start(controller)
 
     def update_display(self, disp):
         if self.new_frame(disp):
@@ -39,6 +40,7 @@ class Display:
                 if disp[i][j] != self.DISPLAY_copy[i][j]:
                     return True
         return False
+
 
 class SevenDotsController:
     def __init__(self):
@@ -69,13 +71,12 @@ class SevenDotsController:
     def display(self):
         for disp in self.outputs:
             disp.update_display(self.DISPLAY)
-            
 
 
 if __name__ == '__main__':
-    controller = SevenDotsController()
-    controller.outputs.append(Display(MockSerialPort()))
-    controller.outputs.append(Display(SerialPort()))
-    #controller.inputs.append(classic_video_input.VideoInput())
-    controller.inputs.append(raspi_video_input.VideoInput())
-    controller.start()
+    main_controller = SevenDotsController()
+    main_controller.outputs.append(Display(MockSerialPort()))
+    main_controller.outputs.append(Display(SerialPort()))
+    # main_controller.inputs.append(classic_video_input.VideoInput())
+    main_controller.inputs.append(raspi_video_input.VideoInput())
+    main_controller.start()

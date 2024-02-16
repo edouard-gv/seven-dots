@@ -1,5 +1,6 @@
 import serial
 
+
 class SerialPort:
     def __init__(self):
         self.ser = None
