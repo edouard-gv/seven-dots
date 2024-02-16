@@ -22,6 +22,8 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from picamera2 import Picamera2
 
+from inputs.video_input import VideoInput
+
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -174,7 +176,7 @@ def main():
         int(args.cameraId), args.frameWidth, args.frameHeight, None)
 
 
-class VideoInput:
+class RaspiVideoInput(VideoInput):
     def start(self, controller):
         run_default(controller)
 

@@ -1,4 +1,4 @@
-from dots_controller import Display
+from outputs.display import Display
 from screen_output import ScreenPort, convert
 
 

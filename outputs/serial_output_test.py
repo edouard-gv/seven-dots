@@ -1,6 +1,6 @@
 from time import sleep
 
-from dots_controller import Display
+from outputs.display import Display
 from outputs.serial_output import SerialPort
 
 disp = Display(SerialPort())

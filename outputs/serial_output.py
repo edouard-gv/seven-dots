@@ -1,7 +1,9 @@
 import serial
 
+from outputs.display import Port
 
-class SerialPort:
+
+class SerialPort(Port):
     def __init__(self):
         self.ser = None
 

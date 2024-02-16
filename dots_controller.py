@@ -1,46 +1,13 @@
-import copy
-
 import statemachine
 
-from inputs import classic_video_input
-from inputs import raspi_video_input
+from inputs.video_input import VideoInput
+from inputs.classic_video_input import ClassicVideoInput
+from inputs.raspi_video_input import RaspiVideoInput
 from display_computer import compute_display
 from dots_machine import DotsMachine
+from outputs.display import Port, Display
 from outputs.screen_output import ScreenPort
 from outputs.serial_output import SerialPort
-
-
-class Display:
-    def __init__(self, output):
-        self.UW = 7
-        self.UH = 4
-        self.DISPLAY_copy = [[0 for _ in range(self.UW)] for _ in range(self.UH)]
-        self.output = output
-
-    def start(self, controller):
-        self.output.start(controller)
-
-    def update_display(self, disp):
-        if self.new_frame(disp):
-            self.output.write(0x80)
-            self.output.write(0x83)
-            self.output.write(0x00)
-
-            for i in range(self.UH):
-                for j in range(self.UW):
-                    d = disp[i][j]
-                    self.output.write(d)
-
-            self.output.write(0x8F)
-
-        self.DISPLAY_copy = copy.deepcopy(disp)
-
-    def new_frame(self, disp):
-        for j in range(self.UW):
-            for i in range(self.UH):
-                if disp[i][j] != self.DISPLAY_copy[i][j]:
-                    return True
-        return False
 
 
 class SevenDotsController:
@@ -48,7 +15,7 @@ class SevenDotsController:
         self.inputs = []
         self.outputs = []
         self.machine = None
-        self.DISPLAY = [[0 for j in range(7)] for i in range(4)]
+        self.display_matrix = [[0 for j in range(7)] for i in range(4)]
 
     def start(self):
         for output in self.outputs:
@@ -56,6 +23,12 @@ class SevenDotsController:
         self.machine = DotsMachine(self)
         for input in self.inputs:
             input.start(self)
+
+    def append_input(self, video_input: VideoInput):
+        self.inputs.append(video_input)
+
+    def append_display_from_output(self, output: Port):
+        self.outputs.append(Display(output))
 
     def process_command(self, gesture):
         try:
@@ -66,18 +39,18 @@ class SevenDotsController:
             pass
 
     def process_state(self):
-        compute_display(self.DISPLAY, self.machine)
+        compute_display(self.display_matrix, self.machine)
         self.display()
 
     def display(self):
         for disp in self.outputs:
-            disp.update_display(self.DISPLAY)
+            disp.update_display(self.display_matrix)
 
 
 if __name__ == '__main__':
     main_controller = SevenDotsController()
-    main_controller.outputs.append(Display(ScreenPort()))
-    main_controller.outputs.append(Display(SerialPort()))
-    # main_controller.inputs.append(classic_video_input.VideoInput())
-    main_controller.inputs.append(raspi_video_input.VideoInput())
+    main_controller.append_display_from_output(ScreenPort())
+    main_controller.append_display_from_output(SerialPort())
+    # main_controller.append_input(ClassicVideoInput())
+    main_controller.append_input(RaspiVideoInput())
     main_controller.start()

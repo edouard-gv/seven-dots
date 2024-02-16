@@ -1,4 +1,7 @@
-class ScreenPort:
+from outputs.display import Port
+
+
+class ScreenPort(Port):
 
     def start(self, controller):
         pass

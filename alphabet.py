@@ -57,7 +57,7 @@ nums = [
 ]
 
 
-def write(text, DISPLAY, line_shift=0, column_shift=0):
+def write(text, display_matrix, line_shift=0, column_shift=0):
     pad = line_shift * 7 + column_shift
     text = text.lower()
     strLen = min(len(text), 7 * 4 - pad)
@@ -66,15 +66,15 @@ def write(text, DISPLAY, line_shift=0, column_shift=0):
         y = (pos + pad) % 7
         x = (pos + pad) // 7
         if ind >= 0:
-            DISPLAY[x][y] = alphabet_bin[ind]
+            display_matrix[x][y] = alphabet_bin[ind]
 
 
-def writeCenter(text, DISPLAY):
+def writeCenter(text, display_matrix):
     spaces = ""
     spacesLength = 7 + (7 - len(text)) // 2
     for i in range(spacesLength):
         spaces += " "
-    write(spaces + text, DISPLAY)
+    write(spaces + text, display_matrix)
 
 
 # converting seconds to time
