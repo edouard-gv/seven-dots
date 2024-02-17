@@ -66,16 +66,6 @@ def get_mocked_timer_factory(timers):
     return get_mocked_timer
 
 
-def test_initialization():
-    timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers)
-    )
-    assert m.current_state.name == "Black screen"
-    timers.tick(2)
-    assert m.current_state.name == "Blank screen"
-
-
 def test_first_transition():
     m = DotsMachine(fake_controller, start_value="blank_screen")
     m.open_palm()

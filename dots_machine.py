@@ -5,9 +5,7 @@ from statemachine import StateMachine, State
 
 class DotsMachine(StateMachine):
     # States
-    no_screen = State(initial=True)
-    blank_screen = State()
-    black_screen = State()
+    blank_screen = State(initial=True)
     hello = State()
     bye = State()
     countdown = State()
@@ -27,9 +25,7 @@ class DotsMachine(StateMachine):
             | bye.to(bye, internal=True)
             | countdown_confirm_stop.to(countdown_confirm_stop, internal=True)
     )
-    turn_off = black_screen.to(blank_screen) | bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
-
-    check_screen = no_screen.to(black_screen)
+    turn_off = bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
 
     victory = (
             blank_screen.to(countdown, on="set_countdown_to_120")
@@ -63,26 +59,15 @@ class DotsMachine(StateMachine):
     def get_timer(nb_ticks, callback):
         return threading.Timer(nb_ticks, callback)
 
-    def __init__(self, controler, get_timer=get_timer, *args, **kwargs):
+    def __init__(self, controller, get_timer=get_timer, *args, **kwargs):
         self.turn_off_timer = None
         self.nb_transitions = 0
-        self.controler = controler
+        self.controller = controller
         self.countdown_value = 0
         self.countdown_timer = None
         self.get_timer = get_timer
         self.previous_action = None
         super(DotsMachine, self).__init__(*args, **kwargs)
-
-    # we are still intializing the machine, so we cannot use the controler yet and
-    # we cannot print anything, therefore we switch to the black screen state
-    # in another thread
-    def on_enter_no_screen(self, event, state):
-        self.turn_off_timer = self.get_timer(0, self.check_screen)
-        self.turn_off_timer.start()
-
-    def on_enter_black_screen(self, event, state):
-        self.turn_off_timer = self.get_timer(2, self.turn_off)
-        self.turn_off_timer.start()
 
     def on_enter_bye(self, event, state):
         self.turn_off_timer = self.get_timer(2, self.turn_off)
@@ -125,7 +110,7 @@ class DotsMachine(StateMachine):
         else:
             if self.current_state in [self.countdown, self.countdown_confirm_stop]:
                 self.turn_off()
-        self.controler.process_state()
+        self.controller.process_state()
 
     def on_enter_state(self, event, state):
         self.previous_action = event
@@ -136,8 +121,8 @@ class DotsMachine(StateMachine):
         # print(f"On '{event}', on the '{state.id}' state.")
         # at initialization of the machine, the controler doesn't have the machine yet,
         # but the machine enters the initial state and triggers the enter state event
-        if hasattr(self.controler, "machine") and self.controler.machine is not None and state != self.countdown:
-            self.controler.process_state()
+        if hasattr(self.controller, "machine") and self.controller.machine is not None and state != self.countdown:
+            self.controller.process_state()
 
     def countdown_running(self):
         return self.countdown_timer is not None and self.countdown_timer.is_alive()
