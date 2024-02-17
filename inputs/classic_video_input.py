@@ -190,6 +190,9 @@ def run(model: str, num_hands: int,
         if cv2.waitKey(1) == 27:
             break
 
+        if controller.machine.slow_pace:
+            time.sleep(1)
+
     recognizer.close()
     cap.release()
     cv2.destroyAllWindows()

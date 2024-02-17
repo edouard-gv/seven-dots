@@ -116,6 +116,9 @@ def run(model: str, num_hands: int,
         if stop:
             break
 
+        if controller.machine.slow_pace:
+            time.sleep(1)
+
     recognizer.close()
 
 

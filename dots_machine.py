@@ -67,6 +67,7 @@ class DotsMachine(StateMachine):
         self.countdown_timer = None
         self.get_timer = get_timer
         self.previous_action = None
+        self.slow_pace = False
         super(DotsMachine, self).__init__(*args, **kwargs)
 
     def on_enter_bye(self, event, state):
@@ -75,6 +76,12 @@ class DotsMachine(StateMachine):
             self.countdown_timer.cancel()
             self.countdown_timer = None
         self.turn_off_timer.start()
+
+    def on_enter_blank_screen(self, event, state):
+        self.slow_pace = True
+
+    def on_exit_blank_screen(self, event, state):
+        self.slow_pace = False
 
     def set_countdown_to_120(self):
         if not self.countdown_running():
