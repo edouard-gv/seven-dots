@@ -1,0 +1,13 @@
+[Unit]
+Description=Flipdots seven segment gesture management service
+After=multi-user.target
+
+[Service]
+Type=idle
+WorkingDirectory=/home/pi/seven-dots
+ExecStart=/bin/bash /home/pi/seven-dots/start.sh
+ExecStop=/bin/bash /home/pi/seven-dots/stop.sh
+User=pi
+
+[Install]
+WantedBy=multi-user.target
