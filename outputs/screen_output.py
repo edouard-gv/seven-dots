@@ -1,3 +1,4 @@
+import os
 from outputs.display import Port
 
 
@@ -5,6 +6,9 @@ class ScreenPort(Port):
 
     def start(self, controller):
         pass
+
+    def is_supported(self):
+        return os.name == 'nt'
 
     def send_bytes(self, *frame_bytes):
         for byte in frame_bytes:

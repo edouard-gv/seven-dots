@@ -11,6 +11,10 @@ class Port(metaclass=ABCMeta):
     def write(self, i):
         pass
 
+    @abstractmethod
+    def is_supported(self):
+        pass
+
 
 class Display:
     def __init__(self, output):

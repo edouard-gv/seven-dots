@@ -14,6 +14,7 @@
 """Main scripts to run gesture recognition."""
 
 import argparse
+import os
 import time
 
 import cv2
@@ -177,6 +178,9 @@ def main():
 
 
 class RaspiVideoInput(VideoInput):
+    def is_supported(self):
+        return os.name == 'posix'
+
     def start(self, controller):
         run_default(controller)
 

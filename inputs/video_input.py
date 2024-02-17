@@ -9,3 +9,7 @@ class VideoInput(metaclass=ABCMeta):
     @abstractmethod
     def stop(self):
         pass
+
+    @abstractmethod
+    def is_supported(self):
+        pass

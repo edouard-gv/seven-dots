@@ -14,6 +14,7 @@
 """Main scripts to run gesture recognition."""
 
 import argparse
+import os
 import sys
 import time
 
@@ -253,6 +254,9 @@ def main():
 
 
 class ClassicVideoInput(VideoInput):
+    def is_supported(self):
+        return os.name == 'nt'
+
     def start(self, controller):
         run_default(controller)
 

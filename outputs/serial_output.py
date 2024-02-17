@@ -1,9 +1,13 @@
+import os.path
 import serial
 
 from outputs.display import Port
 
 
 class SerialPort(Port):
+    def is_supported(self):
+        return os.path.exists('/dev/serial0')
+
     def __init__(self):
         self.ser = None
 

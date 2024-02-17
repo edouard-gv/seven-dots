@@ -25,10 +25,14 @@ class SevenDotsController:
             input.start(self)
 
     def append_input(self, video_input: VideoInput):
-        self.inputs.append(video_input)
+        if video_input.is_supported():
+            print("Adding input"+str(video_input))
+            self.inputs.append(video_input)
 
     def append_display_from_output(self, output: Port):
-        self.outputs.append(Display(output))
+        if output.is_supported():
+            print("Adding display"+str(output))
+            self.outputs.append(Display(output))
 
     def process_command(self, gesture):
         try:
@@ -51,6 +55,6 @@ if __name__ == '__main__':
     main_controller = SevenDotsController()
     main_controller.append_display_from_output(ScreenPort())
     main_controller.append_display_from_output(SerialPort())
-    # main_controller.append_input(ClassicVideoInput())
+    main_controller.append_input(ClassicVideoInput())
     main_controller.append_input(RaspiVideoInput())
     main_controller.start()
