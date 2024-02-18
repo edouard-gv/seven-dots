@@ -156,7 +156,7 @@ class DotsMachine(StateMachine):
         # print(f"On '{event}', on the '{state.id}' state.")
         # at initialization of the machine, the controller doesn't have the machine yet,
         # but the machine enters the initial state and triggers the enter state event
-        if hasattr(self.controller, "machine") and self.controller.machine is not None and state != self.countdown:
+        if hasattr(self.controller, "machine") and self.controller.machine is not None:  # and state != self.countdown:
             self.controller.process_state()
 
     def countdown_running(self):
