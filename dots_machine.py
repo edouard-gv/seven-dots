@@ -95,8 +95,9 @@ class DotsMachine(StateMachine):
     def on_enter_bye(self, event, state):
         self.turn_off_timer = self.get_timer(2, self.turn_off)
         if self.countdown_running():
-            self.countdown_timer.cancel()
-            self.countdown_timer = None
+            if self.countdown_timer is not None:
+                self.countdown_timer.cancel()
+                self.countdown_timer = None
         self.turn_off_timer.start()
 
     def on_enter_blank_screen(self, event, state):
@@ -139,6 +140,9 @@ class DotsMachine(StateMachine):
         else:
             if self.current_state in [self.countdown, self.countdown_confirm_stop]:
                 self.turn_off()
+            if self.countdown_timer is not None:
+                self.countdown_timer.cancel()
+                self.countdown_timer = None
         self.controller.process_state()
 
     def on_enter_state(self, event, state):
