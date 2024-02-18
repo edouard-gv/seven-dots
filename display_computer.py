@@ -1,4 +1,5 @@
-import alphabet
+import display_utils.countdown
+from display_utils import alphabet
 from dots_machine import DotsMachine
 
 
@@ -45,12 +46,10 @@ def compute_display(machine: DotsMachine):
 
     if machine.current_state == machine.countdown:
         if machine.countdown_running():
-            alphabet.writeCenter(
-                alphabet.print_seconds(machine.countdown_value), display
-            )
+            display_utils.countdown.lit_all_positions(machine.countdown_value, display)
     else:
         if machine.countdown_running() and not machine.current_state == machine.bye:
             alphabet.write(
-                alphabet.print_seconds(machine.countdown_value), display, line_shift=3
+                display_utils.countdown.print_seconds(machine.countdown_value), display, line_shift=3
             )
     return display

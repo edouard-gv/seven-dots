@@ -1,4 +1,4 @@
-import alphabet
+from display_utils import alphabet
 
 
 def test_print_text_with_no_pad():
@@ -71,11 +71,3 @@ def test_print_dont_clear():
         [14, 15, 16, 17, 18, 19, 20],
         [21, 22, 23, 24, 25, 26, 27],
     ]
-
-
-def test_print_seconds_over60():
-    assert alphabet.print_seconds(61) == " 1:01"
-
-
-def test_print_seconds_under60():
-    assert alphabet.print_seconds(9) == "   09"

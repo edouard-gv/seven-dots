@@ -76,10 +76,3 @@ def writeCenter(text, display_matrix):
     for i in range(spacesLength):
         spaces += " "
     write(spaces + text, display_matrix)
-
-
-# converting seconds to time
-def print_seconds(seconds):
-    minutes = seconds // 60
-    seconds %= 60
-    return f"{minutes:>2}:{seconds:02}" if minutes else f"   {seconds:02}"
