@@ -18,26 +18,26 @@ def countdown_position(param):
         (2, 2, 6),  # 8
         (2, 4, 6),  # 9
         (1, 4, 3),  # 10
-        (1, 4, 2),  # 11
-        (2, 2, 5),  # 12
-        (2, 4, 1),  # 13
-        (1, 2, 4),  # 14
-        (1, 3, 0),  # 15
-        (2, 3, 0),  # 16
-        (1, 3, 1),  # 17
-        (2, 3, 4),  # 18
-        (1, 3, 5),  # 19
-        (2, 3, 2),  # 20
-        (1, 3, 6),  # 21
-        (2, 3, 3),  # 22
-        (1, 2, 0),  # 23
-        (2, 4, 0),  # 24
-        (2, 2, 0),  # 25
-        (1, 4, 0),  # 26
-        (1, 4, 1),  # 27
-        (2, 2, 4),  # 28
-        (1, 2, 5),  # 29
-        (2, 4, 2),  # 30
+        (2, 4, 2),  # 11
+        (2, 2, 4),  # 12
+        (2, 4, 3),  # 13
+        (2, 2, 3),  # 14
+        (2, 3, 3),  # 15
+        (1, 4, 6),  # 16
+        (1, 2, 6),  # 17
+        (1, 4, 1),  # 18
+        (1, 2, 5),  # 19
+        (1, 3, 5),  # 20
+        (1, 3, 1),  # 21
+        (0, 4, 3),  # 22
+        (0, 2, 3),  # 23
+        (0, 4, 2),  # 24
+        (0, 2, 4),  # 25
+        (0, 3, 4),  # 26
+        (0, 3, 2),  # 27
+        (0, 3, 5),  # 28
+        (0, 3, 1),  # 29
+        (0, 3, 6),  # 30
     ]
 
     return map[param - 1]
@@ -69,7 +69,20 @@ def highest_position_for_seconds(seconds):
         return seconds // 60 + 19
 
 
-def lit_all_positions(seconds, display_matrix):
+def lit_all_positions_for_seconds(seconds, display_matrix):
     for n in range(1, seconds + 1):
         lit_countdown_position(highest_position_for_seconds(n), display_matrix)
     return display_matrix
+
+
+if __name__ == "__main__":
+    screen = ScreenPort()
+    display = Display(screen)
+    screen.start(None)
+    matrix = [[0 for _ in range(7)] for _ in range(4)]
+    for i in range(1, 31):
+        print(f'Countdown: {i}')
+        lit_countdown_position(i, matrix)
+        display.update_display(matrix)
+
+
