@@ -23,7 +23,7 @@ class SystemControl(metaclass=ABCMeta):
 
 class LinuxSystemControl(SystemControl):
     def shutdown(self):
-        os.system("sudo systemctl shutdown")
+        os.system("sudo systemctl poweroff")
 
     def update(self):
         os.system("bash /home/pi/seven-dots/update.sh")
