@@ -1,4 +1,7 @@
 from dots_controller import SevenDotsController
+from dots_machine import DotsMachine
+from dots_machine_test import Timers, get_mocked_timer_factory
+from outputs.display import Display
 from system_control import FakeSystemControl
 from outputs.screen_output import ScreenPort
 
@@ -56,6 +59,22 @@ def test_journey_to_update_through_cancels():
     c.process_command("thumb_up")
     assert system_control.is_update()
     assert c.machine.slow_pace
+
+
+# cf issue #16
+def test_no_blank_screen_when_starting_countdown_after_hello():
+    c = SevenDotsController()
+    timers = Timers()
+    m = DotsMachine(
+        c, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+    )
+
+    c.machine = m
+    port = ScreenPort()
+    c.outputs.append(Display(port))
+    c.process_command("pointing_up")
+    assert c.machine.current_state.value == "countdown"
+    assert port.output != (" "*(7*4-1)+"\n")*(4*4-1)
 
 
 if __name__ == "__main__":

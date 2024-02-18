@@ -131,6 +131,8 @@ class DotsMachine(StateMachine):
         if not self.countdown_running():
             self.countdown_timer = self.get_timer(1, self.countdown_tick)
             self.countdown_timer.start()
+        # I don't understand why I have to force the refresh, on_enter_state should do it (cf issue #16)
+        self.controller.process_state()
 
     def countdown_tick(self):
         if self.countdown_value > 0:
