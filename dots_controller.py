@@ -15,12 +15,12 @@ class SevenDotsController:
         self.inputs = []
         self.outputs = []
         self.machine = None
-        self.display_matrix = [[0 for j in range(7)] for i in range(4)]
 
     def start(self):
         for output in self.outputs:
             output.start(self)
         self.machine = DotsMachine(self)
+        self.process_command("init")
         for input in self.inputs:
             input.start(self)
 
@@ -37,18 +37,13 @@ class SevenDotsController:
     def process_command(self, gesture):
         try:
             self.machine.send(gesture.lower())
-            # print("sending: "+gesture)
         except statemachine.exceptions.TransitionNotAllowed as tna:
-            # print(str(tna))
             pass
 
     def process_state(self):
-        compute_display(self.display_matrix, self.machine)
-        self.display()
-
-    def display(self):
+        display_matrix = compute_display(self.machine)
         for disp in self.outputs:
-            disp.update_display(self.display_matrix)
+            disp.update_display(display_matrix)
 
 
 if __name__ == '__main__':

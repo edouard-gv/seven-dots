@@ -1,6 +1,11 @@
 import alphabet
 
 
+def initialize_display():
+    display = [[0b0000000 for _ in range(7)] for _ in range(4)]
+    return display
+
+
 def fill_display(display):
     for i in range(4):
         for j in range(7):
@@ -13,8 +18,8 @@ def clear_display(display):
             display[i][j] = 0b0000000
 
 
-def compute_display(display, machine):
-    clear_display(display)
+def compute_display(machine):
+    display = initialize_display()
     if machine.current_state.name == "Hello":
         alphabet.writeCenter("Salut", display)
     if machine.current_state.name == "Bye":
@@ -35,3 +40,4 @@ def compute_display(display, machine):
             alphabet.write(
                 alphabet.print_seconds(machine.countdown_value), display, line_shift=3
             )
+    return display
