@@ -11,6 +11,11 @@ class DotsMachine(StateMachine):
     bye = State()
     countdown = State()
     countdown_confirm_stop = State()
+    menu_system = State()
+    shutdown_confirm = State()
+    update_confirm = State()
+    system_shutdown = State(final=True)
+    system_update = State(final=True)
 
     init = (black_screen.to(blank_screen))
 
@@ -36,6 +41,7 @@ class DotsMachine(StateMachine):
             | bye.to(countdown, on="set_countdown_to_120")
             | countdown.to(countdown, on="set_countdown_to_120", unless="action_was_victory")
             | countdown.to(countdown, cond="action_was_victory", internal=True)
+            | menu_system.to(update_confirm)
     )
 
     pointing_up = (
@@ -44,6 +50,7 @@ class DotsMachine(StateMachine):
             | bye.to(countdown, on="set_countdown_to_60")
             | countdown.to(countdown, on="set_countdown_to_60", unless="action_was_pointing_up")
             | countdown.to(countdown, cond="action_was_pointing_up", internal=True)
+            | menu_system.to(shutdown_confirm)
     )
 
     none = (
@@ -51,12 +58,24 @@ class DotsMachine(StateMachine):
             | countdown.to(countdown, cond="action_was_none", internal=True)
     )
 
-    thumb_up = countdown_confirm_stop.to(bye) | bye.to(bye, internal=True)
+    thumb_up = (
+            countdown_confirm_stop.to(bye)
+            | bye.to(bye, internal=True)
+            | shutdown_confirm.to(system_shutdown)
+            | update_confirm.to(system_update)
+    )
 
     thumb_down = (
             countdown_confirm_stop.to(countdown)
             | countdown.to(countdown, internal=True)
+            | shutdown_confirm.to(menu_system)
+            | update_confirm.to(menu_system)
     )
+
+    iloveyou = (blank_screen.to(menu_system))
+
+    def is_system_state(self):
+        return self.current_state.value.lower().startswith("system_")
 
     # timer factory that can be overiden for testing
     def get_timer(nb_ticks, callback):
@@ -123,6 +142,8 @@ class DotsMachine(StateMachine):
         self.controller.process_state()
 
     def on_enter_state(self, event, state):
+        if state in self.final_states:
+            self.slow_pace = True
         self.previous_action = event
         if self.turn_off_timer is not None:
             self.turn_off_timer.cancel()

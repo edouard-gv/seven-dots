@@ -281,5 +281,14 @@ def test_slow_pace():
     assert not m.slow_pace
 
 
+def test_is_system_state():
+    m = DotsMachine(fake_controller, start_value="blank_screen")
+    assert not m.is_system_state()
+    m = DotsMachine(fake_controller, start_value="system_shutdown")
+    assert m.is_system_state()
+    m = DotsMachine(fake_controller, start_value="system_update")
+    assert m.is_system_state()
+
+
 if __name__ == "__main__":
     pass

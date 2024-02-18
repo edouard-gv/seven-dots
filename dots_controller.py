@@ -1,3 +1,5 @@
+import os
+
 import statemachine
 
 from inputs.video_input import VideoInput
@@ -8,6 +10,7 @@ from dots_machine import DotsMachine
 from outputs.display import Port, Display
 from outputs.screen_output import ScreenPort
 from outputs.serial_output import SerialPort
+from system_control import SystemControl, LinuxSystemControl, FakeSystemControl
 
 
 class SevenDotsController:
@@ -15,6 +18,7 @@ class SevenDotsController:
         self.inputs = []
         self.outputs = []
         self.machine = None
+        self.system_control = None
 
     def start(self):
         for output in self.outputs:
@@ -34,20 +38,30 @@ class SevenDotsController:
             print("Adding display"+str(output))
             self.outputs.append(Display(output))
 
+    def set_system_control(self, system_control: SystemControl):
+        self.system_control = system_control
+
     def process_command(self, gesture):
         try:
             self.machine.send(gesture.lower())
         except statemachine.exceptions.TransitionNotAllowed as tna:
+            # print(tna)
             pass
 
     def process_state(self):
         display_matrix = compute_display(self.machine)
         for disp in self.outputs:
             disp.update_display(display_matrix)
+        if self.machine.is_system_state():
+            self.system_control.process_system_state(self.machine)
 
 
 if __name__ == '__main__':
     main_controller = SevenDotsController()
+    if os.name == 'nt':
+        main_controller.set_system_control(FakeSystemControl())
+    else:
+        main_controller.set_system_control(LinuxSystemControl())
     main_controller.append_display_from_output(ScreenPort())
     main_controller.append_display_from_output(SerialPort())
     main_controller.append_input(ClassicVideoInput())
