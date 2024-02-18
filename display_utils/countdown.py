@@ -64,9 +64,9 @@ def highest_position_for_seconds(seconds):
     if seconds <= 10:
         return seconds
     if seconds <= 120:
-        return seconds // 10 + 9
+        return (seconds-1) // 10 + 10
     else:
-        return seconds // 60 + 19
+        return (seconds-1) // 60 + 20
 
 
 def lit_all_positions_for_seconds(seconds, display_matrix):

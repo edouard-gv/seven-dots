@@ -30,7 +30,7 @@ def test_print_seconds_under60():
 
 
 @pytest.mark.parametrize("seconds, highest_position",
-                         [(0, 0), (10, 10), (11, 10), (19, 10), (20, 11), (29, 11), (119, 20), (120, 21), (180, 22),
+                         [(0, 0), (10, 10), (11, 11), (20, 11), (21, 12), (30, 12), (120, 21), (121, 22), (180, 22),
                           (240, 23), (300, 24), (600, 29)])
 def test_highest_positions(seconds, highest_position):
     assert highest_position_for_seconds(seconds) == highest_position
@@ -38,7 +38,7 @@ def test_highest_positions(seconds, highest_position):
 
 def test_lit_all_positions_for_19pos():
     display_matrix = [[0 for j in range(7)] for i in range(4)]
-    display_matrix = display_utils.countdown.lit_all_positions_for_seconds(105, display_matrix)
+    display_matrix = display_utils.countdown.lit_all_positions_for_seconds(95, display_matrix)
     assert display_matrix == [[0, 0, 0, 0, 0, 0, 0],
                               [0, 0, 104, 28, 74, 0, 0],
                               [0, 0, 88, 106, 76, 0, 0],
