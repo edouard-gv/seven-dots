@@ -274,5 +274,12 @@ def test_same_state_for_none():
     assert nb_transitions == m.nb_transitions
 
 
+def test_slow_pace():
+    m = DotsMachine(fake_controller, start_value="blank_screen")
+    assert m.slow_pace
+    m.open_palm()
+    assert not m.slow_pace
+
+
 if __name__ == "__main__":
     pass
