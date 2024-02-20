@@ -1,5 +1,7 @@
 # Piloting a seven-segment board with gestures
 
+Small video demo (with the ux as of 20/02/2024 - it will change): https://1drv.ms/a/s!AjMgPYDiHw6gqslRsRapyz2YUNRxWA?e=cCj1WB
+
 ## Installation quick guide on raspberry pi 4 (4 Go)
 
 ### Prerequisite
