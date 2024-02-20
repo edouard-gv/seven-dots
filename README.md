@@ -78,3 +78,8 @@ You can also try to access to the serial port with stty, for example:
 stty -F /dev/serial0 speed 57600 cs8 -cstopb -parenb -echo
 echo -en '\x80\x83\x00\x01\x02\x04\x08\x10\x20\x40\x7e\x30\x6d\x79\x33\x5b\x5f\x70\x7f\x7b\x77\x1f\x4e\x3d\x4f\x47\x00\x01\x64\x02\x09\x8F' > /dev/serial0
 ```
+
+# Special thanks
+* To [AlphaZeta](https://flipdots.com/en/products-services/small-7-segment-displays/) for making this device
+* To [Ksawery Kirklewski](https://ksawerykomputery.com/tools/flipdigits-player) for making this pretty and explaining how to do it
+* To the nice people from [the parisian maker shop LetMeKnow](https://letmeknow.fr/)
