@@ -13,7 +13,7 @@ alphabet_bin = [
     0b1111011,  # 9
     0b0000001,  # -
     0b1110111,  # a
-    0b1111111,  # b
+    0b0011111,  # b
     0b1001110,  # c
     0b0111101,  # d
     0b1001111,  # e
@@ -76,3 +76,7 @@ def writeCenter(text, display_matrix):
     for i in range(spacesLength):
         spaces += " "
     write(spaces + text, display_matrix)
+
+
+def generate_bytes_string(text):
+    return "".join(['\\x{0:02x}'.format(alphabet_bin[alphabet.find(char)]) for char in text.lower()])

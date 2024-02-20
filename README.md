@@ -64,10 +64,10 @@ ser = serial.Serial(port='/dev/serial0', baudrate=57600)
 ser.isOpen()
 # should print Serial<id=0x........, open=True>(port='/dev/serial0', baudrate=57600, bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=False, rtscts=False, dsrdtr=False)
 print(ser)
-# should answer 32 and print "-" every where
+# should answer 32 and print "-" everywhere
 ser.write(bytes([0x80, 0x83, 0x00]+[0b1]*28+[0x8F]))
-# equivalent
-ser.write(b'\x80\x83\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x8F')
+# print all segments once on first line than "0123456789ABCDEF -?':" on the other lines
+ser.write(b'\x80\x83\x00\x01\x02\x04\x08\x10\x20\x40\x7e\x30\x6d\x79\x33\x5b\x5f\x70\x7f\x7b\x77\x1f\x4e\x3d\x4f\x47\x00\x01\x64\x02\x09\x8F')
 ```
 
 # Troubleshooting
@@ -76,5 +76,5 @@ If when instantiating ser, you have `FileNotFoundError: [Errno 2] No such file o
 You can also try to access to the serial port with stty, for example:
 ```bash
 stty -F /dev/serial0 speed 57600 cs8 -cstopb -parenb -echo
-echo -en '\x80\x83\x00\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x8F' > /dev/serial0
+echo -en '\x80\x83\x00\x01\x02\x04\x08\x10\x20\x40\x7e\x30\x6d\x79\x33\x5b\x5f\x70\x7f\x7b\x77\x1f\x4e\x3d\x4f\x47\x00\x01\x64\x02\x09\x8F' > /dev/serial0
 ```
