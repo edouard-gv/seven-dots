@@ -125,7 +125,7 @@ def test_launch_2mins_countdown():
     m.victory()
     assert m.current_state.name == "Countdown"
     assert m.countdown_value == 120
-    timers.tick(nb_ticks=118)
+    timers.tick(nb_ticks=119)
     assert m.countdown_value == 2
     timers.tick()
     assert m.countdown_value == 1
@@ -143,7 +143,7 @@ def test_launch_1mins_countdown():
     m.pointing_up()
     assert m.current_state.name == "Countdown"
     assert m.countdown_value == 60
-    timers.tick(nb_ticks=59)
+    timers.tick(nb_ticks=60)
     assert m.countdown_value == 1
     timers.tick()
     timers.tick()
@@ -169,7 +169,7 @@ def test_when_countdown_stops_during_confirmation():
         fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
     )
     m.victory()
-    for _ in range(119):
+    for _ in range(120):
         timers.tick()
     assert m.countdown_value == 1
     m.open_palm()
@@ -203,7 +203,7 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     m.open_palm()
     assert m.countdown_running()
     assert m.current_state.name == "Countdown"
-    assert m.countdown_value == 119
+    assert m.countdown_value == 120
     m.none()
     m.open_palm()
     assert m.current_state.name == "Countdown confirm stop"
@@ -251,6 +251,17 @@ def test_increment_countdown_by_1min_with_no_transitions_pu2v():
     m.victory()
     assert m.countdown_value == 180
     m.countdown_timer.cancel()
+
+
+def test_print_timer_for_one_second_after_countdown_is_set():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
+    )
+    m.victory()
+    assert m.show_countdown()
+    timers.tick()
+    assert not m.show_countdown()
 
 
 def test_no_increment_countdown_when_same_action_pu():

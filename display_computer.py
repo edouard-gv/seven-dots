@@ -47,9 +47,13 @@ def compute_display(machine: DotsMachine):
     if machine.current_state == machine.countdown:
         if machine.countdown_running():
             display_utils.countdown.lit_all_positions_for_seconds(machine.countdown_value, display)
+            if machine.show_countdown():
+                alphabet.write(
+                    display_utils.countdown.print_seconds(machine.countdown_value), display
+                )
     else:
         if machine.countdown_running() and not machine.current_state == machine.bye:
             alphabet.write(
-                display_utils.countdown.print_seconds(machine.countdown_value), display, line_shift=3
+                display_utils.countdown.print_seconds(machine.countdown_value), display
             )
     return display

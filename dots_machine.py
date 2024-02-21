@@ -90,6 +90,7 @@ class DotsMachine(StateMachine):
         self.get_timer = get_timer
         self.previous_action = None
         self.slow_pace = False
+        self.countdown_just_set = False
         super(DotsMachine, self).__init__(*args, **kwargs)
 
     def on_enter_bye(self, event, state):
@@ -106,18 +107,6 @@ class DotsMachine(StateMachine):
     def on_exit_blank_screen(self, event, state):
         self.slow_pace = False
 
-    def set_countdown_to_120(self):
-        if not self.countdown_running():
-            self.countdown_value = 120  # 120 ticks are 2 minutes
-        else:
-            self.countdown_value += 120
-
-    def set_countdown_to_60(self):
-        if not self.countdown_running():
-            self.countdown_value = 60  # 60 ticks are 1 minute
-        else:
-            self.countdown_value += 60
-
     def action_was_pointing_up(self, event, state):
         return self.previous_action == 'pointing_up'
 
@@ -132,6 +121,26 @@ class DotsMachine(StateMachine):
 
     def action_was_closed_fist(self, event, state):
         return self.previous_action == 'closed_fist'
+
+    def __hide_countdown(self):
+        self.countdown_just_set = False
+        self.controller.process_state()
+
+    def __set_countdown_to_(self, delay):
+        if not self.countdown_running():
+            self.countdown_value = delay
+        else:
+            self.countdown_value += delay
+        self.countdown_just_set = True
+        self.get_timer(1, self.__hide_countdown).start()
+
+    def set_countdown_to_120(self):
+        # 120 ticks are 2 minutes
+        self.__set_countdown_to_(120)
+
+    def set_countdown_to_60(self):
+        # 60 ticks are 1 minute
+        self.__set_countdown_to_(60)
 
     def on_enter_countdown(self, event, state):
         if not self.countdown_running():
@@ -169,6 +178,9 @@ class DotsMachine(StateMachine):
 
     def countdown_running(self):
         return self.countdown_timer is not None and self.countdown_timer.is_alive()
+
+    def show_countdown(self):
+        return self.countdown_running() and self.countdown_just_set
 
 
 if __name__ == "__main__":
