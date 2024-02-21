@@ -159,7 +159,7 @@ def test_countdown_should_be_put_in_background_until_the_end():
     assert m.current_state.name == "Countdown"
     timers.tick()
     m.open_palm()
-    assert m.current_state.name == "Hello"
+    assert m.current_state.name == "Countdown confirm stop"
     timers.tick(nb_ticks=120)
 
 
@@ -172,7 +172,7 @@ def test_when_countdown_stops_during_confirmation():
     for _ in range(119):
         timers.tick()
     assert m.countdown_value == 1
-    m.closed_fist()
+    m.open_palm()
     assert m.current_state.name == "Countdown confirm stop"
     timers.tick()
     timers.tick()
@@ -183,7 +183,7 @@ def test_when_countdown_stops_during_confirmation():
 def test_countdown_should_be_interrupted_by_bye_with_confirmation():
     m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
-    m.closed_fist()
+    m.open_palm()
     m.thumb_up()
     assert m.current_state.name == "Bye"
 
@@ -195,28 +195,23 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     )
     m.victory()
     timers.tick()
-    m.closed_fist()
-    m.thumb_down()
-    assert m.countdown_running() == True
+    m.open_palm()
+    m.none()
+    m.open_palm()
+    m.open_palm()
+    assert m.countdown_running()
     assert m.current_state.name == "Countdown"
     assert m.countdown_value == 119
-    m.countdown_timer.cancel()
-
-
-def test_countdown_should_be_interrupted_by_bye_in_all_states():
-    m = DotsMachine(fake_controller, start_value="hello")
-    m.victory()
+    m.none()
     m.open_palm()
-    m.closed_fist()
-    m.thumb_up()
-    assert m.countdown_running() == False
-    assert m.current_state.name == "Bye"
+    assert m.current_state.name == "Countdown confirm stop"
+    m.countdown_timer.cancel()
 
 
 def test_increment_countdown_by_1min():
     m = DotsMachine(fake_controller, start_value="hello")
     m.pointing_up()
-    m.open_palm()
+    m.closed_fist()
     m.pointing_up()
     assert m.countdown_value == 120
 
@@ -224,7 +219,7 @@ def test_increment_countdown_by_1min():
 def test_increment_countdown_by_2min():
     m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
-    m.open_palm()
+    m.none()
     m.victory()
     assert m.countdown_value == 240
 

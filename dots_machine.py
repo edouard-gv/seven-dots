@@ -22,16 +22,20 @@ class DotsMachine(StateMachine):
     open_palm = (
             blank_screen.to(hello)
             | bye.to(hello)
-            | countdown.to(hello)
+            | countdown.to(countdown_confirm_stop, unless="action_was_open_palm")
+            | countdown.to(countdown, cond="action_was_open_palm", internal=True)
             | hello.to(hello, internal=True)
+            | shutdown_confirm.to(menu_system)
+            | update_confirm.to(menu_system)
+            | menu_system.to(blank_screen, unless="action_was_open_palm")
+            | menu_system.to(menu_system, cond="action_was_open_palm", internal=True)
+            | countdown_confirm_stop.to(countdown, unless="action_was_open_palm")
+            | countdown_confirm_stop.to(countdown_confirm_stop, cond="action_was_open_palm", internal=True)
     )
     closed_fist = (
-            blank_screen.to(bye)
-            | hello.to(bye, unless="countdown_running")
-            | hello.to(countdown_confirm_stop, cond="countdown_running")
-            | countdown.to(countdown_confirm_stop)
-            | bye.to(bye, internal=True)
-            | countdown_confirm_stop.to(countdown_confirm_stop, internal=True)
+            hello.to(bye)
+            | countdown.to(countdown, unless="action_was_closed_fist")
+            | countdown.to(countdown, cond="action_was_closed_fist", internal=True)
     )
     turn_off = bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
 
@@ -56,20 +60,16 @@ class DotsMachine(StateMachine):
     none = (
             countdown.to(countdown, unless="action_was_none")
             | countdown.to(countdown, cond="action_was_none", internal=True)
+            | menu_system.to(menu_system, unless="action_was_none")
+            | menu_system.to(menu_system, cond="action_was_none", internal=True)
+            | countdown_confirm_stop.to(countdown_confirm_stop, unless="action_was_none")
+            | countdown_confirm_stop.to(countdown_confirm_stop, cond="action_was_none", internal=True)
     )
 
     thumb_up = (
             countdown_confirm_stop.to(bye)
-            | bye.to(bye, internal=True)
             | shutdown_confirm.to(system_shutdown)
             | update_confirm.to(system_update)
-    )
-
-    thumb_down = (
-            countdown_confirm_stop.to(countdown)
-            | countdown.to(countdown, internal=True)
-            | shutdown_confirm.to(menu_system)
-            | update_confirm.to(menu_system)
     )
 
     iloveyou = (blank_screen.to(menu_system))
@@ -124,8 +124,14 @@ class DotsMachine(StateMachine):
     def action_was_victory(self, event, state):
         return self.previous_action == 'victory'
 
+    def action_was_open_palm(self, event, state):
+        return self.previous_action == 'open_palm'
+
     def action_was_none(self, event, state):
         return self.previous_action == 'none'
+
+    def action_was_closed_fist(self, event, state):
+        return self.previous_action == 'closed_fist'
 
     def on_enter_countdown(self, event, state):
         if not self.countdown_running():
@@ -167,4 +173,4 @@ class DotsMachine(StateMachine):
 
 if __name__ == "__main__":
     m = DotsMachine(None)
-    m._graph().write_png("dots_machine.png")
+    m._graph().write_png("doc/dots_machine.png")
