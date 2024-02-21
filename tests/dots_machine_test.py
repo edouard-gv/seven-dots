@@ -186,6 +186,8 @@ def test_countdown_should_be_interrupted_by_bye_with_confirmation():
     m.open_palm()
     m.thumb_up()
     assert m.current_state.name == "Bye"
+    m.turn_off_timer.cancel()
+
 
 
 def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
@@ -211,9 +213,11 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
 def test_increment_countdown_by_1min():
     m = DotsMachine(fake_controller, start_value="hello")
     m.pointing_up()
-    m.closed_fist()
+    m.none()
     m.pointing_up()
     assert m.countdown_value == 120
+    m.countdown_timer.cancel()
+
 
 
 def test_increment_countdown_by_2min():
@@ -222,14 +226,15 @@ def test_increment_countdown_by_2min():
     m.none()
     m.victory()
     assert m.countdown_value == 240
+    m.countdown_timer.cancel()
 
-
-def test_increment_countdown_by_2min_with_none():
+def test_increment_countdown_by_2min_with_closed_fist():
     m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
-    m.none()
+    m.closed_fist()
     m.victory()
     assert m.countdown_value == 240
+    m.countdown_timer.cancel()
 
 
 def test_increment_countdown_by_1min_with_no_transitions_v2pu():
@@ -237,6 +242,7 @@ def test_increment_countdown_by_1min_with_no_transitions_v2pu():
     m.victory()
     m.pointing_up()
     assert m.countdown_value == 180
+    m.countdown_timer.cancel()
 
 
 def test_increment_countdown_by_1min_with_no_transitions_pu2v():
@@ -244,6 +250,7 @@ def test_increment_countdown_by_1min_with_no_transitions_pu2v():
     m.pointing_up()
     m.victory()
     assert m.countdown_value == 180
+    m.countdown_timer.cancel()
 
 
 def test_no_increment_countdown_when_same_action_pu():
@@ -251,6 +258,7 @@ def test_no_increment_countdown_when_same_action_pu():
     m.pointing_up()
     m.pointing_up()
     assert m.countdown_value == 60
+    m.countdown_timer.cancel()
 
 
 def test_no_increment_countdown_when_same_action_v():
@@ -258,6 +266,7 @@ def test_no_increment_countdown_when_same_action_v():
     m.victory()
     m.victory()
     assert m.countdown_value == 120
+    m.countdown_timer.cancel()
 
 
 def test_same_state_for_none():
@@ -267,6 +276,7 @@ def test_same_state_for_none():
     nb_transitions = m.nb_transitions
     m.none()
     assert nb_transitions == m.nb_transitions
+    m.countdown_timer.cancel()
 
 
 def test_slow_pace():

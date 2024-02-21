@@ -57,8 +57,6 @@ def test_oneprint_digit():
     send_prefix(port)
     send_bytes(port, 0b1111111)
     send_close(port)
-    print(port.output.replace(" ", "."))
-
     assert port.output.replace(" ", ".") == \
            """\
 ._.........................
@@ -86,7 +84,6 @@ def test_two_print_digit_integrating_display():
     display_array[0][0] = 0b1111111
     display_array[0][1] = 0b1111111
     display.update_display(display_array)
-
     assert port.output.replace(" ", ".") == \
            """\
 ._..._.....................
@@ -111,8 +108,6 @@ def test_two_print_digit():
     send_prefix(port)
     send_bytes(port, 0b1111111, 0b1111111)
     send_close(port)
-    print(port.output.replace(" ", "."))
-
     assert port.output.replace(" ", ".") == \
            """\
 ._..._.....................
@@ -139,8 +134,6 @@ def test_three_print_digit():
     send_bytes(port, 0b1111111, 0b1111111, 0x00, 0x00, 0x00, 0x00, 0x00)
     send_bytes(port, 0b1111111)
     send_close(port)
-    print(port.output.replace(" ", "."))
-
     assert port.output.replace(" ", ".") == \
            """\
 ._..._.....................
@@ -167,8 +160,6 @@ def test_full_line_print_digit():
     for _ in range(7):
         send_bytes(port, 0b1111111)
     send_close(port)
-    print(port.output.replace(" ", "."))
-
     assert port.output.replace(" ", ".") == \
            """\
 ._..._..._..._..._..._..._.
@@ -209,7 +200,6 @@ def test_for_fun():
     for i in range(28):
         send_bytes(port, i)
     send_close(port)
-    print(port.output.replace(" ", " "))
     assert port.output.replace(" ", " ") == """\
                            
      _  |   |_       _  |  
