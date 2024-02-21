@@ -1,4 +1,6 @@
 mediapipe
 python-statemachine[diagrams]
 pydot
+#sometimes should be installed with sudo apt-get install graphviz or via https://graphviz.org/download/
 Graphviz
+
