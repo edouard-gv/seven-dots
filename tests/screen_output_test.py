@@ -1,5 +1,5 @@
 from outputs.display import Display
-from screen_output import ScreenPort, convert
+from outputs.screen_output import convert, ScreenPort
 
 
 def send_prefix(port):
