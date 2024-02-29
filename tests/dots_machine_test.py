@@ -1,3 +1,6 @@
+import pytest
+from statemachine.exceptions import TransitionNotAllowed
+
 from dots_machine import DotsMachine
 
 
@@ -198,11 +201,12 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     m.victory()
     timers.tick()
     m.open_palm()
+    assert m.current_state.name == "Countdown confirm stop"
     m.none()
     m.open_palm()
     m.open_palm()
     assert m.countdown_running()
-    assert m.current_state.name == "Countdown"
+    assert m.current_state.name == "Countdown accept increment"
     assert m.countdown_value == 120
     m.none()
     m.open_palm()
@@ -213,22 +217,33 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
 def test_increment_countdown_by_1min():
     m = DotsMachine(fake_controller, start_value="hello")
     m.pointing_up()
-    m.none()
+    m.closed_fist()
     m.pointing_up()
     assert m.countdown_value == 120
     m.countdown_timer.cancel()
 
 
-
-def test_increment_countdown_by_2min():
+def test_dont_increment_countdown_by_if_no_open_palm():
     m = DotsMachine(fake_controller, start_value="hello")
-    m.victory()
-    m.none()
-    m.victory()
-    assert m.countdown_value == 240
+    m.pointing_up()
+    with pytest.raises(TransitionNotAllowed):
+        m.pointing_up()
+    assert m.countdown_value == 60
     m.countdown_timer.cancel()
 
-def test_increment_countdown_by_2min_with_closed_fist():
+
+def test_increment_after_canceling_stop_countdown():
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.pointing_up()
+    m.open_palm()
+    m.none()
+    m.open_palm()
+    m.pointing_up()
+    assert m.countdown_value == 120
+    m.countdown_timer.cancel()
+
+
+def test_increment_countdown_by_2min():
     m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
     m.closed_fist()
@@ -242,6 +257,15 @@ def test_increment_countdown_by_1min_with_no_transitions_v2pu():
     m.victory()
     m.pointing_up()
     assert m.countdown_value == 180
+    m.countdown_timer.cancel()
+
+
+def test_increment_countdown_by_1min_with_no_transitions_v2pu2v():
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.victory()
+    m.pointing_up()
+    m.victory()
+    assert m.countdown_value == 300
     m.countdown_timer.cancel()
 
 
@@ -267,7 +291,8 @@ def test_print_timer_for_one_second_after_countdown_is_set():
 def test_no_increment_countdown_when_same_action_pu():
     m = DotsMachine(fake_controller, start_value="hello")
     m.pointing_up()
-    m.pointing_up()
+    with pytest.raises(TransitionNotAllowed):
+        m.pointing_up()
     assert m.countdown_value == 60
     m.countdown_timer.cancel()
 
@@ -275,18 +300,9 @@ def test_no_increment_countdown_when_same_action_pu():
 def test_no_increment_countdown_when_same_action_v():
     m = DotsMachine(fake_controller, start_value="hello")
     m.victory()
-    m.victory()
+    with pytest.raises(TransitionNotAllowed):
+        m.victory()
     assert m.countdown_value == 120
-    m.countdown_timer.cancel()
-
-
-def test_same_state_for_none():
-    m = DotsMachine(fake_controller, start_value="hello")
-    m.pointing_up()
-    m.none()
-    nb_transitions = m.nb_transitions
-    m.none()
-    assert nb_transitions == m.nb_transitions
     m.countdown_timer.cancel()
 
 
