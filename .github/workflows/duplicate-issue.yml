@@ -6,6 +6,7 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: wow-actions/duplicate-issue@v1
+      - uses: wow-actions/duplicate-issue@v1.1.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
