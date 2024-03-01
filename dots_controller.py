@@ -2,6 +2,7 @@ import os
 
 import statemachine
 
+from ext_openmeteo.openmeteo import OpenMeteo
 from inputs.video_input import VideoInput
 from inputs.classic_video_input import ClassicVideoInput
 from inputs.raspi_video_input import RaspiVideoInput
@@ -19,6 +20,7 @@ class SevenDotsController:
         self.outputs = []
         self.machine = None
         self.system_control = None
+        self.open_meteo = OpenMeteo()
 
     def start(self):
         for output in self.outputs:

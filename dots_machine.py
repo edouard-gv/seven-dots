@@ -12,6 +12,8 @@ class DotsMachine(StateMachine):
     countdown = State()
     countdown_accept_increment = State()
     countdown_confirm_stop = State()
+    meteo_1 = State()
+    meteo_2 = State()
     menu_system = State()
     shutdown_confirm = State()
     update_confirm = State()
@@ -19,6 +21,13 @@ class DotsMachine(StateMachine):
     system_update = State(final=True)
 
     init = (black_screen.to(blank_screen))
+
+    next = (
+            hello.to(meteo_1)
+            | meteo_1.to(meteo_2)
+            | bye.to(bye, on="stop_hello_timer", internal=True)
+            | countdown.to(countdown, on="stop_hello_timer", internal=True)
+    )
 
     open_palm = (
             blank_screen.to(hello)
@@ -28,6 +37,8 @@ class DotsMachine(StateMachine):
             | countdown_accept_increment.to(countdown_confirm_stop, unless="action_was_open_palm")
             | countdown_accept_increment.to(countdown_accept_increment, cond="action_was_open_palm", internal=True)
             | hello.to(hello, internal=True)
+            | meteo_1.to(meteo_1, internal=True)
+            | meteo_2.to(meteo_2, internal=True)
             | shutdown_confirm.to(menu_system)
             | update_confirm.to(menu_system)
             | menu_system.to(blank_screen, unless="action_was_open_palm")
@@ -37,6 +48,8 @@ class DotsMachine(StateMachine):
     )
     closed_fist = (
             hello.to(bye)
+            | meteo_1.to(bye)
+            | meteo_2.to(bye)
             | countdown.to(countdown_accept_increment)
     )
     turn_off = bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
@@ -44,6 +57,8 @@ class DotsMachine(StateMachine):
     victory = (
             blank_screen.to(countdown, on="set_countdown_to_120")
             | hello.to(countdown, on="set_countdown_to_120")
+            | meteo_1.to(countdown, on="set_countdown_to_120")
+            | meteo_2.to(countdown, on="set_countdown_to_120")
             | bye.to(countdown, on="set_countdown_to_120")
             | countdown_accept_increment.to(countdown, on="set_countdown_to_120")
             | countdown.to(countdown, cond="action_was_pointing_up", on="set_countdown_to_120")
@@ -53,6 +68,8 @@ class DotsMachine(StateMachine):
     pointing_up = (
             blank_screen.to(countdown, on="set_countdown_to_60")
             | hello.to(countdown, on="set_countdown_to_60")
+            | meteo_1.to(countdown, on="set_countdown_to_60")
+            | meteo_2.to(countdown, on="set_countdown_to_60")
             | bye.to(countdown, on="set_countdown_to_60")
             | countdown_accept_increment.to(countdown, on="set_countdown_to_60")
             | countdown.to(countdown, cond="action_was_victory", on="set_countdown_to_60")
@@ -93,6 +110,7 @@ class DotsMachine(StateMachine):
         self.previous_action = None
         self.slow_pace = False
         self.countdown_just_set = False
+        self.hello_timer = None
         super(DotsMachine, self).__init__(*args, **kwargs)
 
     def on_enter_bye(self, event, state):
@@ -102,6 +120,14 @@ class DotsMachine(StateMachine):
                 self.countdown_timer.cancel()
                 self.countdown_timer = None
         self.turn_off_timer.start()
+
+    def on_enter_hello(self, event, state):
+        self.hello_timer = self.get_timer(1, self.next)
+        self.hello_timer.start()
+
+    def on_enter_meteo_1(self, event, state):
+        self.hello_timer = self.get_timer(2, self.next)
+        self.hello_timer.start()
 
     def on_enter_blank_screen(self, event, state):
         self.slow_pace = True
@@ -183,6 +209,11 @@ class DotsMachine(StateMachine):
 
     def show_countdown(self):
         return self.countdown_running() and self.countdown_just_set
+
+    def stop_hello_timer(self):
+        if self.hello_timer is not None:
+            self.hello_timer.cancel()
+            self.hello_timer = None
 
 
 if __name__ == "__main__":

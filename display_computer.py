@@ -23,26 +23,32 @@ def clear_display(display):
 def compute_display(machine: DotsMachine):
     display = initialize_display()
     if machine.current_state == machine.hello:
-        alphabet.writeCenter("Salut", display)
+        alphabet.center_in_screen("Salut", display)
     if machine.current_state == machine.bye:
-        alphabet.writeCenter("Bye", display)
+        alphabet.center_in_screen("Bye", display)
     if machine.current_state == machine.blank_screen:
         clear_display(display)
     if machine.current_state == machine.black_screen:
         fill_display(display)
     if machine.current_state == machine.countdown_confirm_stop:
-        alphabet.writeCenter("Stop ?", display)
+        alphabet.center_in_screen("Stop ?", display)
     if machine.current_state == machine.menu_system:
         alphabet.write("1 Off", display)
         alphabet.write("2 MAJ", display, line_shift=1)
     if machine.current_state == machine.shutdown_confirm:
-        alphabet.writeCenter("OFF ?", display)
+        alphabet.center_in_screen("OFF ?", display)
     if machine.current_state == machine.update_confirm:
-        alphabet.writeCenter("MAJ ?", display)
+        alphabet.center_in_screen("MAJ ?", display)
     if machine.current_state == machine.system_shutdown:
-        alphabet.writeCenter("...", display)
+        alphabet.center_in_screen("...", display)
     if machine.current_state == machine.system_update:
-        alphabet.writeCenter("...", display)
+        alphabet.center_in_screen("...", display)
+    if machine.current_state == machine.meteo_1:
+        for line_nb in range(4):
+            alphabet.center_in_line(machine.controller.open_meteo.weather_views()[0][line_nb], display, line_nb)
+    if machine.current_state == machine.meteo_2:
+        for line_nb in range(4):
+            alphabet.center_in_line(machine.controller.open_meteo.weather_views()[1][line_nb], display, line_nb)
 
     if machine.current_state == machine.countdown or machine.current_state == machine.countdown_accept_increment:
         if machine.countdown_running():

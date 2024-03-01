@@ -73,6 +73,7 @@ def test_first_transition():
     m = DotsMachine(fake_controller, start_value="blank_screen")
     m.open_palm()
     assert m.current_state.name == "Hello"
+    m.hello_timer.cancel()
 
 
 def test_same_state_on_hello():
@@ -84,6 +85,7 @@ def test_same_state_on_hello():
     m.open_palm()
     assert m.current_state.name == "Hello"
     assert m.nb_transitions == 2
+    m.hello_timer.cancel()
 
 
 def test_before_turn_off():
@@ -95,12 +97,13 @@ def test_before_turn_off():
     m.closed_fist()
     assert m.nb_transitions == 2
     timers.tick()
+    timers.tick()
     timers.tick()  # 2 seconds
     assert m.current_state.name == "Blank screen"
     assert m.nb_transitions == 3
 
 
-def test_dont_turn_off_if_interupted():
+def test_dont_turn_off_if_interrupted():
     timers = Timers()
     m = DotsMachine(
         fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
@@ -116,8 +119,9 @@ def test_dont_turn_off_if_interupted():
     timers.tick()
     assert m.current_state.name == "Bye"
     timers.tick()
+    timers.tick()
     assert m.current_state.name == "Blank screen"
-    assert m.nb_transitions == 5
+    assert m.nb_transitions == 6
 
 
 def test_launch_2mins_countdown():
@@ -190,8 +194,7 @@ def test_countdown_should_be_interrupted_by_bye_with_confirmation():
     m.thumb_up()
     assert m.current_state.name == "Bye"
     m.turn_off_timer.cancel()
-
-
+    m.hello_timer.cancel()
 
 def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     timers = Timers()
@@ -207,7 +210,7 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     m.open_palm()
     assert m.countdown_running()
     assert m.current_state.name == "Countdown accept increment"
-    assert m.countdown_value == 120
+    assert m.countdown_value == 119
     m.none()
     m.open_palm()
     assert m.current_state.name == "Countdown confirm stop"
@@ -221,6 +224,7 @@ def test_increment_countdown_by_1min():
     m.pointing_up()
     assert m.countdown_value == 120
     m.countdown_timer.cancel()
+    m.hello_timer.cancel()
 
 
 def test_dont_increment_countdown_by_if_no_open_palm():
@@ -285,6 +289,7 @@ def test_print_timer_for_one_second_after_countdown_is_set():
     m.victory()
     assert m.show_countdown()
     timers.tick()
+    timers.tick()
     assert not m.show_countdown()
 
 
@@ -311,6 +316,7 @@ def test_slow_pace():
     assert m.slow_pace
     m.open_palm()
     assert not m.slow_pace
+    m.hello_timer.cancel()
 
 
 def test_is_system_state():
@@ -320,6 +326,69 @@ def test_is_system_state():
     assert m.is_system_state()
     m = DotsMachine(fake_controller, start_value="system_update")
     assert m.is_system_state()
+
+
+def test_full_meteo_cycle():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="blank_screen"
+    )
+    m.open_palm()
+    assert m.current_state == m.hello
+    timers.tick()
+    assert m.current_state == m.meteo_1
+    timers.tick()
+    timers.tick()
+    assert m.current_state == m.meteo_2
+    timers.tick()
+    assert m.current_state == m.meteo_2
+
+
+def test_meteo_interrupted_in_hello():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="blank_screen"
+    )
+    m.open_palm()
+    assert m.current_state == m.hello
+    m.pointing_up()
+    assert m.current_state == m.countdown
+    timers.tick()
+    assert m.current_state == m.countdown
+    timers.tick()
+    assert m.current_state == m.countdown
+    m.countdown_timer.cancel()
+
+
+def test_meteo_interrupted_in_first_view():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="blank_screen"
+    )
+    m.open_palm()
+    assert m.current_state == m.hello
+    timers.tick()
+    m.pointing_up()
+    assert m.current_state == m.countdown
+    timers.tick()
+    assert m.current_state == m.countdown
+    m.hello_timer.cancel()
+    m.countdown_timer.cancel()
+
+
+def test_meteo_interrupted_in_second_view():
+    timers = Timers()
+    m = DotsMachine(
+        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="blank_screen"
+    )
+    m.open_palm()
+    assert m.current_state == m.hello
+    timers.tick()
+    timers.tick()
+    m.pointing_up()
+    assert m.current_state == m.countdown
+    m.hello_timer.cancel()
+    m.countdown_timer.cancel()
 
 
 if __name__ == "__main__":

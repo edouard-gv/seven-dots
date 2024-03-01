@@ -70,12 +70,16 @@ def write(text, display_matrix, line_shift=0, column_shift=0):
             display_matrix[x][y] = alphabet_bin[ind]
 
 
-def writeCenter(text, display_matrix):
+def center_in_screen(text, display_matrix):
     spaces = ""
     spacesLength = 7 + (7 - len(text)) // 2
     for i in range(spacesLength):
         spaces += " "
     write(spaces + text, display_matrix)
+
+
+def center_in_line(text, display_matrix, line):
+    write(text, display_matrix, line_shift=line, column_shift=(7 - len(text)) // 2)
 
 
 def generate_bytes_string(text):
