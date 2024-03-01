@@ -44,7 +44,7 @@ def compute_display(machine: DotsMachine):
     if machine.current_state == machine.system_update:
         alphabet.writeCenter("...", display)
 
-    if machine.current_state == machine.countdown:
+    if machine.current_state == machine.countdown or machine.current_state == machine.countdown_accept_increment:
         if machine.countdown_running():
             display_utils.countdown.lit_all_positions_for_seconds(machine.countdown_value, display)
             if machine.show_countdown():
