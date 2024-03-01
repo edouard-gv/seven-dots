@@ -9,6 +9,36 @@ class OpenMeteo:
         cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
         retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
         self.session = retry_session
+        self.__wma_ww_code_map = {
+            '0': 'bleu +',
+            '1': 'bleu',
+            '2': 'bleu -',
+            '3': 'couvert',
+            '45': 'brouil',
+            '48': 'brouil',
+            '51': 'bruine',
+            '53': 'bruine+',
+            '55': 'bruin++',
+            '56': 'bruine',
+            '57': 'bruin++',
+            '61': 'pluie',
+            '63': 'pluie+',
+            '65': 'pluie++',
+            '66': 'pluie v',
+            '67': 'pluie+v',
+            '71': 'neige',
+            '73': 'neige+',
+            '75': 'neige++',
+            '77': 'grele',
+            '80': 'douches',
+            '81': 'douche+',
+            '82': 'douch++',
+            '85': 'neige+',
+            '86': 'neige++',
+            '95': 'orage',
+            '96': 'or +gre',
+            '99': 'or +gre'
+        }
 
     def weather_api(self):
         url = "https://api.open-meteo.com/v1/forecast"
@@ -23,6 +53,11 @@ class OpenMeteo:
         }
         response = self.session.get(url, params=params).json()
         return response
+
+    def convert_weather_code(self, code):
+        if str(code) not in self.__wma_ww_code_map:
+            return str(code)
+        return self.__wma_ww_code_map[str(code)]
 
     def current_time(self):
         # return time in iso8601 format
@@ -44,9 +79,9 @@ class OpenMeteo:
                 self.format_time(data["daily"]["sunrise"][1]),
                 self.format_time(data["daily"]["sunset"][1]),
             ], [
-                str(data["daily"]["weather_code"][1]),
+                self.convert_weather_code(data["daily"]["weather_code"][1]),
                 "%.1f C" % data["current"]["apparent_temperature"],
-                str(round(data["daily"]["apparent_temperature_min"][1])) + " - " + str(round(
+                str(round(data["daily"]["apparent_temperature_min"][1])) + "-" + str(round(
                     data["daily"]["apparent_temperature_max"][1])),
                 str(round(data["daily"]["apparent_temperature_max"][1] - data["daily"]["apparent_temperature_max"][0])),
             ]]

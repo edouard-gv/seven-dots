@@ -71,4 +71,4 @@ def test_meteo_service_4lines_views():
     meteo_service = mocked_meteo_service()
     views = meteo_service.weather_views()
     assert views[0] == ["01-03", "14:37", "7:31", "18:34"]
-    assert views[1] == ["80", "6.2 C", "0 - 7", "-1"]
+    assert views[1] == ["douches", "6.2 C", "0-7", "-1"]
