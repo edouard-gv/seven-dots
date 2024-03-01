@@ -81,7 +81,7 @@ class OpenMeteo:
             ], [
                 self.convert_weather_code(data["daily"]["weather_code"][1]),
                 "%.1f C" % data["current"]["apparent_temperature"],
-                str(round(data["daily"]["apparent_temperature_min"][1])) + "-" + str(round(
+                str(round(data["daily"]["apparent_temperature_min"][1])) + "_" + str(round(
                     data["daily"]["apparent_temperature_max"][1])),
                 str(round(data["daily"]["apparent_temperature_max"][1] - data["daily"]["apparent_temperature_max"][0])),
             ]]
