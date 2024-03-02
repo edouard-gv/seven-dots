@@ -54,6 +54,8 @@ class DotsMachine(StateMachine):
     )
     turn_off = bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
 
+    standby = meteo_2.to(blank_screen) | countdown.to(countdown, internal=True)
+
     victory = (
             blank_screen.to(countdown, on="set_countdown_to_120")
             | hello.to(countdown, on="set_countdown_to_120")
@@ -112,6 +114,7 @@ class DotsMachine(StateMachine):
         self.slow_pace = False
         self.countdown_just_set = False
         self.hello_timer = None
+        self.standby_timer = None
         super(DotsMachine, self).__init__(*args, **kwargs)
 
     def on_enter_bye(self, event, state):
@@ -194,6 +197,9 @@ class DotsMachine(StateMachine):
             self.turn_off_timer.cancel()
             self.turn_off_timer = None
         self.nb_transitions += 1
+        if self.standby_timer is not None:
+            self.standby_timer.cancel()
+        self.standby_timer = self.start_timer(60*5, self.standby)
         # print(f"On '{event}', on the '{state.id}' state.")
         # at initialization of the machine, the controller doesn't have the machine yet,
         # but the machine enters the initial state and triggers the enter state event

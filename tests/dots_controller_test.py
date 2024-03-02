@@ -1,6 +1,6 @@
 from dots_controller import SevenDotsController
 from dots_machine import DotsMachine
-from dots_machine_test import Timers, get_mocked_timer_factory
+from dots_machine_test import Timers, get_mocked_timer_factory, cancel_timers
 from outputs.display import Display
 from system_control import FakeSystemControl
 from outputs.screen_output import ScreenPort
@@ -12,6 +12,7 @@ def test_screen_blank_on_startup():
     c.append_display_from_output(port)
     c.start()
     assert port.output == (" "*(7*4-1)+"\n")*(4*4-1)
+    cancel_timers(c.machine)
 
 
 def assert_system_running(system_control):
@@ -33,6 +34,7 @@ def test_journey_to_shutdown_with_double_iloveyou():
     c.process_command("thumb_up")
     assert system_control.is_shutdown()
     assert c.machine.slow_pace
+    cancel_timers(c.machine)
 
 
 def test_journey_to_update_through_cancels():
@@ -67,6 +69,7 @@ def test_journey_to_update_through_cancels():
     c.process_command("thumb_up")
     assert system_control.is_update()
     assert c.machine.slow_pace
+    cancel_timers(c.machine)
 
 
 # cf issue #16
@@ -82,6 +85,7 @@ def test_no_blank_screen_when_starting_countdown_after_hello():
     c.process_command("pointing_up")
     assert c.machine.current_state.value == "countdown"
     assert port.output != (" "*(7*4-1)+"\n")*(4*4-1)
+    cancel_timers(m)
 
 
 if __name__ == "__main__":
