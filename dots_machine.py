@@ -97,16 +97,17 @@ class DotsMachine(StateMachine):
         return self.current_state.value.lower().startswith("system_")
 
     # timer factory that can be overiden for testing
-    def get_timer(nb_ticks, callback):
-        return threading.Timer(nb_ticks, callback)
+    def start_timer(self, nb_ticks, callback):
+        timer = threading.Timer(nb_ticks, callback)
+        timer.start()
+        return timer
 
-    def __init__(self, controller, get_timer=get_timer, *args, **kwargs):
+    def __init__(self, controller, *args, **kwargs):
         self.turn_off_timer = None
         self.nb_transitions = 0
         self.controller = controller
         self.countdown_value = 0
         self.countdown_timer = None
-        self.get_timer = get_timer
         self.previous_action = None
         self.slow_pace = False
         self.countdown_just_set = False
@@ -114,20 +115,17 @@ class DotsMachine(StateMachine):
         super(DotsMachine, self).__init__(*args, **kwargs)
 
     def on_enter_bye(self, event, state):
-        self.turn_off_timer = self.get_timer(2, self.turn_off)
+        self.turn_off_timer = self.start_timer(2, self.turn_off)
         if self.countdown_running():
             if self.countdown_timer is not None:
                 self.countdown_timer.cancel()
                 self.countdown_timer = None
-        self.turn_off_timer.start()
 
     def on_enter_hello(self, event, state):
-        self.hello_timer = self.get_timer(1, self.next)
-        self.hello_timer.start()
+        self.hello_timer = self.start_timer(1, self.next)
 
     def on_enter_meteo_1(self, event, state):
-        self.hello_timer = self.get_timer(2, self.next)
-        self.hello_timer.start()
+        self.hello_timer = self.start_timer(2, self.next)
 
     def on_enter_blank_screen(self, event, state):
         self.slow_pace = True
@@ -160,7 +158,7 @@ class DotsMachine(StateMachine):
         else:
             self.countdown_value += delay
         self.countdown_just_set = True
-        self.get_timer(1, self.__hide_countdown).start()
+        self.start_timer(1, self.__hide_countdown)
 
     def set_countdown_to_120(self):
         # 120 ticks are 2 minutes
@@ -172,16 +170,14 @@ class DotsMachine(StateMachine):
 
     def on_enter_countdown(self, event, state):
         if not self.countdown_running():
-            self.countdown_timer = self.get_timer(1, self.countdown_tick)
-            self.countdown_timer.start()
+            self.countdown_timer = self.start_timer(1, self.countdown_tick)
         # I don't understand why I have to force the refresh, on_enter_state should do it (cf issue #16)
         self.controller.process_state()
 
     def countdown_tick(self):
         if self.countdown_value > 0:
             self.countdown_value -= 1
-            self.countdown_timer = self.get_timer(1, self.countdown_tick)
-            self.countdown_timer.start()
+            self.countdown_timer = self.start_timer(1, self.countdown_tick)
         else:
             if self.current_state in [self.countdown, self.countdown_confirm_stop]:
                 self.turn_off()

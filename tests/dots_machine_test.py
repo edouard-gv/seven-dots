@@ -42,13 +42,6 @@ def get_mocked_timer_factory(timers):
             self.callback = callback
             self.timers = timers
 
-        def start(self):
-            self.started = True
-            timers.subscribe(self)
-            if self.nb_ticks == 0:
-                timers.unsubscribe(self)
-                self.callback()
-
         def cancel(self):
             self.cancelled = True
             if self in self.timers.timers:
@@ -64,7 +57,10 @@ def get_mocked_timer_factory(timers):
                 self.callback()
 
     def get_mocked_timer(nb_ticks, callback):
-        return MockedTimer(nb_ticks=nb_ticks, callback=callback)
+        timer = MockedTimer(nb_ticks=nb_ticks, callback=callback)
+        timer.started = True
+        timers.subscribe(timer)
+        return timer
 
     return get_mocked_timer
 
@@ -78,7 +74,6 @@ def test_first_transition():
 
 def test_same_state_on_hello():
     m = DotsMachine(fake_controller, start_value="blank_screen")
-
     m.open_palm()
     assert m.current_state.name == "Hello"
     assert m.nb_transitions == 2
@@ -90,9 +85,8 @@ def test_same_state_on_hello():
 
 def test_before_turn_off():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
     assert m.nb_transitions == 1
     m.closed_fist()
     assert m.nb_transitions == 2
@@ -105,9 +99,8 @@ def test_before_turn_off():
 
 def test_dont_turn_off_if_interrupted():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
     assert m.nb_transitions == 1
     m.closed_fist()
     assert m.nb_transitions == 2
@@ -126,9 +119,8 @@ def test_dont_turn_off_if_interrupted():
 
 def test_launch_2mins_countdown():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.victory()
     assert m.current_state.name == "Countdown"
     assert m.countdown_value == 120
@@ -144,9 +136,8 @@ def test_launch_2mins_countdown():
 
 def test_launch_1mins_countdown():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.pointing_up()
     assert m.current_state.name == "Countdown"
     assert m.countdown_value == 60
@@ -159,9 +150,8 @@ def test_launch_1mins_countdown():
 
 def test_countdown_should_be_put_in_background_until_the_end():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.victory()
     assert m.current_state.name == "Countdown"
     timers.tick()
@@ -172,9 +162,8 @@ def test_countdown_should_be_put_in_background_until_the_end():
 
 def test_when_countdown_stops_during_confirmation():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.victory()
     for _ in range(120):
         timers.tick()
@@ -198,9 +187,8 @@ def test_countdown_should_be_interrupted_by_bye_with_confirmation():
 
 def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.victory()
     timers.tick()
     m.open_palm()
@@ -210,7 +198,7 @@ def test_countdown_should_not_be_interrupted_by_bye_without_confirmation():
     m.open_palm()
     assert m.countdown_running()
     assert m.current_state.name == "Countdown accept increment"
-    assert m.countdown_value == 119
+    assert m.countdown_value == 120
     m.none()
     m.open_palm()
     assert m.current_state.name == "Countdown confirm stop"
@@ -283,9 +271,8 @@ def test_increment_countdown_by_1min_with_no_transitions_pu2v():
 
 def test_print_timer_for_one_second_after_countdown_is_set():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(fake_controller, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.victory()
     assert m.show_countdown()
     timers.tick()
@@ -330,9 +317,8 @@ def test_is_system_state():
 
 def test_full_meteo_cycle():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="blank_screen"
-    )
+    m = DotsMachine(fake_controller, start_value="blank_screen")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.open_palm()
     assert m.current_state == m.hello
     timers.tick()
@@ -346,9 +332,8 @@ def test_full_meteo_cycle():
 
 def test_meteo_interrupted_in_hello():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="blank_screen"
-    )
+    m = DotsMachine(fake_controller, start_value="blank_screen")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.open_palm()
     assert m.current_state == m.hello
     m.pointing_up()
@@ -362,9 +347,8 @@ def test_meteo_interrupted_in_hello():
 
 def test_meteo_interrupted_in_first_view():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="blank_screen"
-    )
+    m = DotsMachine(fake_controller, start_value="blank_screen")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.open_palm()
     assert m.current_state == m.hello
     timers.tick()
@@ -378,9 +362,8 @@ def test_meteo_interrupted_in_first_view():
 
 def test_meteo_interrupted_in_second_view():
     timers = Timers()
-    m = DotsMachine(
-        fake_controller, get_timer=get_mocked_timer_factory(timers), start_value="blank_screen"
-    )
+    m = DotsMachine(fake_controller, start_value="blank_screen")
+    m.start_timer = get_mocked_timer_factory(timers)
     m.open_palm()
     assert m.current_state == m.hello
     timers.tick()

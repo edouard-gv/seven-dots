@@ -73,9 +73,8 @@ def test_journey_to_update_through_cancels():
 def test_no_blank_screen_when_starting_countdown_after_hello():
     c = SevenDotsController()
     timers = Timers()
-    m = DotsMachine(
-        c, get_timer=get_mocked_timer_factory(timers), start_value="hello"
-    )
+    m = DotsMachine(c, start_value="hello")
+    m.start_timer = get_mocked_timer_factory(timers)
 
     c.machine = m
     port = ScreenPort()
