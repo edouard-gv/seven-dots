@@ -36,11 +36,12 @@ class Timers:
 def get_mocked_timer_factory(timers):
     class MockedTimer:
         def __init__(self, nb_ticks, callback):
-            self.started = False
+            self.started = True
             self.cancelled = False
             self.nb_ticks = nb_ticks
             self.callback = callback
             self.timers = timers
+            timers.subscribe(self)
 
         def cancel(self):
             self.cancelled = True
@@ -56,13 +57,7 @@ def get_mocked_timer_factory(timers):
                 timers.unsubscribe(self)
                 self.callback()
 
-    def get_mocked_timer(nb_ticks, callback):
-        timer = MockedTimer(nb_ticks=nb_ticks, callback=callback)
-        timer.started = True
-        timers.subscribe(timer)
-        return timer
-
-    return get_mocked_timer
+    return lambda nb_ticks, callback: MockedTimer(nb_ticks=nb_ticks, callback=callback)
 
 
 def test_first_transition():
