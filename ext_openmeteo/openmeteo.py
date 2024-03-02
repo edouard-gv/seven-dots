@@ -30,14 +30,14 @@ class OpenMeteo:
             '73': 'neige+',
             '75': 'neige++',
             '77': 'grele',
-            '80': 'douches',
-            '81': 'douche+',
-            '82': 'douch++',
+            '80': 'averses',
+            '81': 'averse+',
+            '82': 'avers++',
             '85': 'neige+',
             '86': 'neige++',
             '95': 'orage',
-            '96': 'or +gre',
-            '99': 'or +gre'
+            '96': 'ora+gre',
+            '99': 'or++gre'
         }
 
     def weather_api(self):
