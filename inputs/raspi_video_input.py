@@ -14,7 +14,6 @@
 """Main scripts to run gesture recognition."""
 
 import argparse
-import os
 import time
 
 import cv2
@@ -24,6 +23,14 @@ from mediapipe.tasks.python import vision
 from picamera2 import Picamera2
 
 from inputs.video_input import VideoInput
+
+
+class RaspiVideoInput(VideoInput):
+
+    def start(self, controller):
+        self.force_stop = False
+        run_default(controller)
+
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -38,7 +45,7 @@ stop = False
 def run(model: str, num_hands: int,
         min_hand_detection_confidence: float,
         min_hand_presence_confidence: float, min_tracking_confidence: float,
-        camera_id: int, width: int, height: int, controller) -> None:
+        camera_id: int, width: int, height: int, controller, video_input: RaspiVideoInput) -> None:
     """Continuously run inference on images acquired from the camera.
 
     Args:
@@ -113,14 +120,14 @@ def run(model: str, num_hands: int,
                     score = round(gesture[0].score, 2)
             recognition_result_list.clear()
 
-        if stop:
+        if video_input.force_stop:
             break
 
     recognizer.close()
 
 
-def run_default(controller):
-    run('gesture_recognizer.task', 2, 0.5, 0.5, 0.5, 0, 640, 480, controller)
+def run_default(controller, video_input: RaspiVideoInput):
+    run('gesture_recognizer.task', 2, 0.5, 0.5, 0.5, 0, 640, 480, controller, video_input)
 
 
 def main():
@@ -174,14 +181,4 @@ def main():
 
     run(args.model, int(args.numHands), args.minHandDetectionConfidence,
         args.minHandPresenceConfidence, args.minTrackingConfidence,
-        int(args.cameraId), args.frameWidth, args.frameHeight, None)
-
-
-class RaspiVideoInput(VideoInput):
-
-    def start(self, controller):
-        run_default(controller)
-
-    def stop(self):
-        global stop
-        stop = True
+        int(args.cameraId), args.frameWidth, args.frameHeight, None, None)
