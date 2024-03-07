@@ -59,7 +59,7 @@ class SevenDotsController:
         if self.machine.is_system_state():
             self.system_control.process_system_state(self.machine)
         if self.machine.current_state == self.machine.standby_screen:
-            threading.Timer(0, self.sensor.start(self)).start()
+            threading.Timer(0, lambda: self.sensor.start(self)).start()
             self.input.stop()
 
 

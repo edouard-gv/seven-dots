@@ -1,10 +1,10 @@
 import threading
 from abc import ABC, abstractmethod
-from gpiozero import MotionSensor
+from gpiozero import MotionSensor as MotionSensorGPIO
 from inputs.video_input import VideoInput
 
 
-class MotionSensor(VideoInput, ABC):
+class MotionSensor(ABC):
     def _wake_up(self, controller):
         controller.process_command("wake_up")
 
@@ -20,7 +20,7 @@ class MotionSensor(VideoInput, ABC):
 class RaspiMotionSensor(MotionSensor):
 
     def __init__(self):
-        self.pir = MotionSensor(4)
+        self.pir = MotionSensorGPIO(4)
 
     def start(self, controller):
         if self.pir.motion_detected:

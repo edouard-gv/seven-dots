@@ -27,9 +27,13 @@ from inputs.video_input import VideoInput
 
 class RaspiVideoInput(VideoInput):
 
+    def __init__(self):
+        self.picam2 = Picamera2()
+        super(RaspiVideoInput, self).__init__()
+
     def start(self, controller):
         self.force_stop = False
-        run_default(controller)
+        run_default(controller, self)
 
 
 mp_hands = mp.solutions.hands
@@ -63,9 +67,8 @@ def run(model: str, num_hands: int,
     """
 
     # Start capturing video input from the camera
-    picam2 = Picamera2()
-    picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (width, height)}))
-    picam2.start()
+    video_input.picam2.configure(video_input.picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (width, height)}))
+    video_input.picam2.start()
 
     # Visualization parameters
     fps_avg_frame_count = 10
@@ -98,7 +101,7 @@ def run(model: str, num_hands: int,
 
     # Continuously capture images from the camera and run inference
     while True:
-        image = picam2.capture_array()
+        image = video_input.picam2.capture_array()
 
         image = cv2.flip(image, 1)
 
@@ -123,6 +126,7 @@ def run(model: str, num_hands: int,
         if video_input.force_stop:
             break
 
+    video_input.picam2.stop()
     recognizer.close()
 
 
