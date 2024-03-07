@@ -7,6 +7,7 @@ class DotsMachine(StateMachine):
     # States
     black_screen = State(initial=True)
     blank_screen = State()
+    standby_screen = State()
     hello = State()
     bye = State()
     countdown = State()
@@ -46,15 +47,29 @@ class DotsMachine(StateMachine):
             | countdown_confirm_stop.to(countdown_accept_increment, unless="action_was_open_palm")
             | countdown_confirm_stop.to(countdown_confirm_stop, cond="action_was_open_palm", internal=True)
     )
+
     closed_fist = (
             hello.to(bye)
             | meteo_1.to(bye)
             | meteo_2.to(bye)
             | countdown.to(countdown_accept_increment)
     )
-    turn_off = bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye)
 
-    standby = meteo_2.to(blank_screen) | countdown.to(countdown, internal=True)
+    turn_off = bye.to(blank_screen) | countdown_confirm_stop.to(bye) | countdown.to(bye) #TODO : a splitter en deux to quit (-> bye) et clear (-> blank_screen)
+
+    standby = (
+            meteo_2.to(standby_screen, unless="motion_detected")
+            | blank_screen.to(standby_screen, unless="motion_detected")
+            | shutdown_confirm.to(standby_screen, unless="motion_detected")
+            | update_confirm.to(standby_screen, unless="motion_detected")
+            | meteo_2.to(meteo_2, cond="motion_detected")
+            | blank_screen.to(blank_screen, cond="motion_detected")
+            | shutdown_confirm.to(shutdown_confirm, cond="motion_detected")
+            | update_confirm.to(update_confirm, cond="motion_detected")
+            | countdown.to(countdown, internal=True)
+    )
+
+    wake_up = standby_screen.to(blank_screen)
 
     victory = (
             blank_screen.to(countdown, on="set_countdown_to_120")
@@ -111,7 +126,6 @@ class DotsMachine(StateMachine):
         self.countdown_value = 0
         self.countdown_timer = None
         self.previous_action = None
-        self.slow_pace = False
         self.countdown_just_set = False
         self.hello_timer = None
         self.standby_timer = None
@@ -130,12 +144,6 @@ class DotsMachine(StateMachine):
     def on_enter_meteo_1(self, event, state):
         self.hello_timer = self.start_timer(2, self.next)
 
-    def on_enter_blank_screen(self, event, state):
-        self.slow_pace = True
-
-    def on_exit_blank_screen(self, event, state):
-        self.slow_pace = False
-
     def action_was_pointing_up(self, event, state):
         return self.previous_action == 'pointing_up'
 
@@ -150,6 +158,9 @@ class DotsMachine(StateMachine):
 
     def action_was_closed_fist(self, event, state):
         return self.previous_action == 'closed_fist'
+
+    def motion_detected(self, event, state):
+        return self.controller.sensor.motion_detected()
 
     def __hide_countdown(self):
         self.countdown_just_set = False
@@ -190,8 +201,6 @@ class DotsMachine(StateMachine):
         self.controller.process_state()
 
     def on_enter_state(self, event, state):
-        if state in self.final_states:
-            self.slow_pace = True
         self.previous_action = event
         if self.turn_off_timer is not None:
             self.turn_off_timer.cancel()
@@ -199,8 +208,9 @@ class DotsMachine(StateMachine):
         self.nb_transitions += 1
         if self.standby_timer is not None:
             self.standby_timer.cancel()
-        self.standby_timer = self.start_timer(60*5, self.standby)
-        # print(f"On '{event}', on the '{state.id}' state.")
+        if state != self.standby_screen:
+            self.standby_timer = self.start_timer(60*5, self.standby)
+        # print(f"{self.__class__} '{self.__hash__()}' entering '{state.id}' state on event '{event}'.")
         # at initialization of the machine, the controller doesn't have the machine yet,
         # but the machine enters the initial state and triggers the enter state event
         if hasattr(self.controller, "machine") and self.controller.machine is not None:  # and state != self.countdown:

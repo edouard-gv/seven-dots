@@ -5,3 +5,5 @@ pydot
 Graphviz
 requests-cache
 retry-requests
+# only on no PI OS :
+# gpiozero

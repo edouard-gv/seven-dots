@@ -116,9 +116,6 @@ def run(model: str, num_hands: int,
         if stop:
             break
 
-        if controller.machine.slow_pace:
-            time.sleep(1)
-
     recognizer.close()
 
 
@@ -181,8 +178,6 @@ def main():
 
 
 class RaspiVideoInput(VideoInput):
-    def is_supported(self):
-        return os.name == 'posix'
 
     def start(self, controller):
         run_default(controller)

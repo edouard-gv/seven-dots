@@ -1,11 +1,13 @@
 import os
+import threading
 
 import statemachine
 
 from ext_openmeteo.openmeteo import OpenMeteo
-from inputs.video_input import VideoInput
 from inputs.classic_video_input import ClassicVideoInput
+from inputs.motion_sensor_input import RaspiMotionSensor, FakeMotionSensor, MotionSensor
 from inputs.raspi_video_input import RaspiVideoInput
+from inputs.video_input import VideoInput
 from display_computer import compute_display
 from dots_machine import DotsMachine
 from outputs.display import Port, Display
@@ -16,10 +18,11 @@ from system_control import SystemControl, LinuxSystemControl, FakeSystemControl
 
 class SevenDotsController:
     def __init__(self):
-        self.inputs = []
-        self.outputs = []
-        self.machine = None
-        self.system_control = None
+        self.sensor: MotionSensor = select_motion_sensor()
+        self.input: VideoInput = select_video_input()
+        self.outputs: list[Display] = []
+        self.machine: DotsMachine = None
+        self.system_control: SystemControl = FakeSystemControl() if os.name == 'nt' else LinuxSystemControl()
         self.open_meteo = OpenMeteo()
 
     def start(self):
@@ -27,28 +30,27 @@ class SevenDotsController:
             output.start(self)
         self.machine = DotsMachine(self)
         self.process_command("init")
-        for input in self.inputs:
-            input.start(self)
-
-    def append_input(self, video_input: VideoInput):
-        if video_input.is_supported():
-            print("Adding input"+str(video_input))
-            self.inputs.append(video_input)
+        self.input.start(self)
 
     def append_display_from_output(self, output: Port):
         if output.is_supported():
             print("Adding display"+str(output))
             self.outputs.append(Display(output))
 
-    def set_system_control(self, system_control: SystemControl):
-        self.system_control = system_control
-
     def process_command(self, gesture):
-        try:
-            self.machine.send(gesture.lower())
-        except statemachine.exceptions.TransitionNotAllowed as tna:
-            # print(tna)
-            pass
+        if gesture == "wake_up":
+            try:
+                self.machine.send(gesture.lower())
+            except statemachine.exceptions.TransitionNotAllowed as tna:
+                # print(f"Exception in {self.machine.__class__} '{self.__hash__()}: {tna}")
+                pass
+            threading.Timer(0, self.input.start(self)).start()
+        else:
+            try:
+                self.machine.send(gesture.lower())
+            except statemachine.exceptions.TransitionNotAllowed as tna:
+                # print(f"Exception in {self.machine.__class__} '{self.__hash__()}: {tna}")
+                pass
 
     def process_state(self):
         display_matrix = compute_display(self.machine)
@@ -56,16 +58,21 @@ class SevenDotsController:
             disp.update_display(display_matrix)
         if self.machine.is_system_state():
             self.system_control.process_system_state(self.machine)
+        if self.machine.current_state == self.machine.standby_screen:
+            threading.Timer(0, self.sensor.start(self)).start()
+            self.input.stop()
+
+
+def select_video_input():
+    return ClassicVideoInput() if os.name == 'nt' else RaspiVideoInput()
+
+
+def select_motion_sensor():
+    return FakeMotionSensor() if os.name == 'nt' else RaspiMotionSensor()
 
 
 if __name__ == '__main__':
     main_controller = SevenDotsController()
-    if os.name == 'nt':
-        main_controller.set_system_control(FakeSystemControl())
-    else:
-        main_controller.set_system_control(LinuxSystemControl())
     main_controller.append_display_from_output(ScreenPort())
     main_controller.append_display_from_output(SerialPort())
-    main_controller.append_input(ClassicVideoInput())
-    main_controller.append_input(RaspiVideoInput())
     main_controller.start()

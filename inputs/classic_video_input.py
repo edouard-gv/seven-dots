@@ -14,7 +14,6 @@
 """Main scripts to run gesture recognition."""
 
 import argparse
-import os
 import sys
 import time
 
@@ -25,6 +24,14 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
 from inputs.video_input import VideoInput
+
+
+class ClassicVideoInput(VideoInput):
+
+    def start(self, controller):
+        self.force_stop = False
+        run_default(controller, self)
+
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -38,7 +45,7 @@ START_TIME = time.time()
 def run(model: str, num_hands: int,
         min_hand_detection_confidence: float,
         min_hand_presence_confidence: float, min_tracking_confidence: float,
-        camera_id: int, width: int, height: int, controller) -> None:
+        camera_id: int, width: int, height: int, controller, video_input: ClassicVideoInput) -> None:
     """Continuously run inference on images acquired from the camera.
 
     Args:
@@ -187,19 +194,16 @@ def run(model: str, num_hands: int,
             cv2.imshow('gesture_recognition', recognition_frame)
 
         # Stop the program if the ESC key is pressed.
-        if cv2.waitKey(1) == 27:
+        if cv2.waitKey(1) == 27 or video_input.force_stop:
             break
-
-        if controller.machine.slow_pace:
-            time.sleep(1)
 
     recognizer.close()
     cap.release()
     cv2.destroyAllWindows()
 
 
-def run_default(controller):
-    run('gesture_recognizer.task', 2, 0.5, 0.5, 0.5, 0, 640, 480, controller)
+def run_default(controller, video_input: ClassicVideoInput):
+    run('gesture_recognizer.task', 2, 0.5, 0.5, 0.5, 0, 640, 480, controller, video_input)
 
 
 def main():
@@ -253,18 +257,7 @@ def main():
 
     run(args.model, int(args.numHands), args.minHandDetectionConfidence,
         args.minHandPresenceConfidence, args.minTrackingConfidence,
-        int(args.cameraId), args.frameWidth, args.frameHeight, None)
-
-
-class ClassicVideoInput(VideoInput):
-    def is_supported(self):
-        return os.name == 'nt'
-
-    def start(self, controller):
-        run_default(controller)
-
-    def stop(self):
-        pass  # TODO
+        int(args.cameraId), args.frameWidth, args.frameHeight, None, None)
 
 
 if __name__ == '__main__':

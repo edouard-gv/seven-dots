@@ -26,6 +26,8 @@ def compute_display(machine: DotsMachine):
         alphabet.center_in_screen("Salut", display)
     if machine.current_state == machine.bye:
         alphabet.center_in_screen("Bye", display)
+    if machine.current_state == machine.standby_screen:
+        alphabet.center_in_line("_", display, 3)
     if machine.current_state == machine.blank_screen:
         clear_display(display)
     if machine.current_state == machine.black_screen:

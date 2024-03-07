@@ -1,22 +1,27 @@
 import pytest
 from statemachine.exceptions import TransitionNotAllowed
 
+from dots_controller import SevenDotsController
 from dots_machine import DotsMachine
 
 
-class FakeController:
+class MockedController(SevenDotsController):
+
+    def __init__(self):
+        super(MockedController, self).__init__()
+        self.input = None
+        self.outputs = []
+        self.open_meteo = None
+
     def process_state(self):
         pass
 
 
-fake_controller = FakeController()
-
+fake_controller = MockedController()
 
 # publish subscribe pattern for faking the timer
 # https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
 # https://pypi.org/project/pubsub/
-
-
 class MockedDotsMachine(DotsMachine):
     class __TimerBus:
         def __init__(self):
@@ -300,13 +305,6 @@ def test_no_increment_countdown_when_same_action_v():
     m.cancel_timers()
 
 
-def test_slow_pace():
-    m = MockedDotsMachine(fake_controller, start_value="blank_screen")
-    assert m.slow_pace
-    m.open_palm()
-    assert not m.slow_pace
-    m.cancel_timers()
-
 
 def test_is_system_state():
     m = MockedDotsMachine(fake_controller, start_value="blank_screen")
@@ -370,7 +368,14 @@ def test_meteo_interrupted_in_second_view():
     m.cancel_timers()
 
 
-def test_standby():
+def test_standby_on_blank_screen():
+    m = MockedDotsMachine(fake_controller, start_value="blank_screen")
+    m.tick(5*60)
+    assert m.current_state == m.standby_screen
+    m.cancel_timers()
+
+
+def test_standby_on_meteo():
     m = MockedDotsMachine(fake_controller, start_value="blank_screen")
     m.open_palm()
     assert m.current_state == m.hello
@@ -379,7 +384,35 @@ def test_standby():
     m.tick(5*60-1)
     assert m.current_state == m.meteo_2
     m.tick()
+    assert m.current_state == m.standby_screen
+    m.cancel_timers()
+
+
+def test_standby_on_shutdown_confirm():
+    m = MockedDotsMachine(fake_controller, start_value="blank_screen")
+    m.iloveyou()
+    assert m.current_state == m.menu_system
+    m.pointing_up()
+    assert m.current_state == m.shutdown_confirm
+    m.tick(5*60-1)
+    assert m.current_state == m.shutdown_confirm
+    m.tick()
+    assert m.current_state == m.standby_screen
+    m.cancel_timers()
+
+
+def test_standby_on_blank_screen_after_bye():
+    m = MockedDotsMachine(fake_controller, start_value="blank_screen")
+    m.open_palm()
+    assert m.current_state == m.hello
+    m.closed_fist()
+    assert m.current_state == m.bye
+    m.tick(2)
     assert m.current_state == m.blank_screen
+    m.tick(5*60-1)
+    assert m.current_state == m.blank_screen
+    m.tick()
+    assert m.current_state == m.standby_screen
     m.cancel_timers()
 
 
@@ -395,7 +428,7 @@ def test_standby_is_postponed_on_action():
     m.tick(5*60-1)
     assert m.current_state == m.meteo_2
     m.tick()
-    assert m.current_state == m.blank_screen
+    assert m.current_state == m.standby_screen
     m.cancel_timers()
 
 
@@ -414,6 +447,14 @@ def test_standby_does_not_affect_countdown():
     m.tick(5*60+30)
     assert m.current_state == m.countdown
     m.cancel_timers()
+
+
+def test_standby_is_woken_up():
+    m = MockedDotsMachine(fake_controller, start_value="blank_screen")
+    m.tick(5*60)
+    assert m.current_state == m.standby_screen
+    m.wake_up()
+    assert m.current_state == m.blank_screen
 
 
 if __name__ == "__main__":
