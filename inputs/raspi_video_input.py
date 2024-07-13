@@ -15,6 +15,7 @@
 
 import argparse
 import time
+import logging
 
 import cv2
 import mediapipe as mp
@@ -32,6 +33,7 @@ class RaspiVideoInput(VideoInput):
         super(RaspiVideoInput, self).__init__()
 
     def start(self, controller):
+        logging.getLogger("sevendots").debug(f'DEBUG EGV - video recognition launching')
         self.force_stop = False
         run_default(controller, self)
 

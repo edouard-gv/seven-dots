@@ -1,4 +1,5 @@
 import threading
+import logging
 
 from statemachine import StateMachine, State
 
@@ -160,7 +161,10 @@ class DotsMachine(StateMachine):
         return self.previous_action == 'closed_fist'
 
     def motion_detected(self, event, state):
-        return self.controller.sensor.motion_detected()
+        is_motion_detected = self.controller.sensor.motion_detected()
+        if is_motion_detected:
+            logging.getLogger("sevendots").debug("DEBUG EGV - Motion detected, standby transition aborted")
+        return is_motion_detected
 
     def __hide_countdown(self):
         self.countdown_just_set = False

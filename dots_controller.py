@@ -1,5 +1,7 @@
 import os
 import threading
+import logging
+from systemd.journal import JournalHandler
 
 import statemachine
 
@@ -24,6 +26,10 @@ class SevenDotsController:
         self.machine: DotsMachine = None
         self.system_control: SystemControl = FakeSystemControl() if os.name == 'nt' else LinuxSystemControl()
         self.open_meteo = OpenMeteo()
+        log = logging.getLogger("sevendots")
+        log.addHandler(JournalHandler())
+        log.setLevel(logging.DEBUG)
+
 
     def start(self):
         for output in self.outputs:
@@ -34,7 +40,7 @@ class SevenDotsController:
 
     def append_display_from_output(self, output: Port):
         if output.is_supported():
-            print("Adding display"+str(output))
+            logging.getLogger("sevendots").info("Adding display"+str(output))
             self.outputs.append(Display(output))
 
     def process_command(self, gesture):
@@ -44,6 +50,7 @@ class SevenDotsController:
             except statemachine.exceptions.TransitionNotAllowed as tna:
                 # print(f"Exception in {self.machine.__class__} '{self.__hash__()}: {tna}")
                 pass
+            logging.getLogger("sevendots").debug('DEBUG EGV - launching video recognition in new thread')
             threading.Timer(0, self.input.start(self)).start()
         else:
             try:
@@ -59,6 +66,7 @@ class SevenDotsController:
         if self.machine.is_system_state():
             self.system_control.process_system_state(self.machine)
         if self.machine.current_state == self.machine.standby_screen:
+            logging.getLogger("sevendots").debug(f'DEBUG EGV - launching sensor in new thread')
             threading.Timer(0, lambda: self.sensor.start(self)).start()
             self.input.stop()
 
