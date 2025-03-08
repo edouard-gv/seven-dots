@@ -43,8 +43,8 @@ class OpenMeteo:
     def weather_api(self):
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
-            "latitude": 48.8,
-            "longitude": 2.33,
+            "latitude": 48.97,
+            "longitude": 3.32,
             "current": "apparent_temperature",
             "daily": ["weather_code", "apparent_temperature_max", "apparent_temperature_min", "sunrise", "sunset"],
             "timezone": "Europe/Berlin",
