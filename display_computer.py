@@ -29,7 +29,9 @@ def compute_display(machine: DotsMachine):
     if machine.current_state == machine.standby_screen:
         alphabet.center_in_line("_", display, 3)
     if machine.current_state == machine.blank_screen:
-        clear_display(display)
+        # clear_display(display)
+        alphabet.write(" Quelle", display, line_shift=1)
+        alphabet.write(" Joie !", display, line_shift=2)
     if machine.current_state == machine.black_screen:
         fill_display(display)
     if machine.current_state == machine.countdown_confirm_stop:

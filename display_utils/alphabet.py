@@ -1,4 +1,4 @@
-alphabet = " 0123456789-abcdefghijklmnopqrstuvwxyz?':.+_"
+alphabet = " 0123456789-abcdefghijklmnopqrstuvwxyz?':.+_!"
 alphabet_bin = [
     0b0000000,  # spacja
     0b1111110,  # 0
@@ -44,6 +44,7 @@ alphabet_bin = [
     0b0000100,  # .
     0b0000101,  # + - bad
     0b0001000,  # _
+    0b1101011,  # !
 ]
 
 nums = [
